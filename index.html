@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orçamento de Caldeiraria</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#e6e9ec;font:15px/1.45 system-ui,sans-serif;color:#1c2630}
+.c{background:#fff;border:1px solid #cfd6dc;border-top:4px solid #f2a900;border-radius:6px;padding:26px;width:min(380px,92vw)}
+h1{margin:0 0 4px;font-size:22px}p{color:#5d6b78;margin:0 0 16px}
+input{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px;border:1px solid #cfd6dc;border-radius:4px;font:inherit}
+button{width:100%;padding:11px;margin-top:6px;border:0;border-radius:4px;font:600 15px system-ui;cursor:pointer;background:#27384a;color:#fff}
+.o{background:#f2a900;color:#1c2630}.g{background:none;color:#5d6b78;border:1px solid #cfd6dc}
+#m{margin-top:12px;font-size:13px;color:#b3261e}
+#sair{position:fixed;right:8px;bottom:8px;width:auto;padding:5px 10px;font-size:12px;opacity:.75;z-index:9}
+</style></head><body>
+<div class="c" id="box"><h1>Orçamento de Caldeiraria</h1><p id="sub">Entre ou crie sua conta.</p><div id="v"></div><div id="m"></div></div>
+<script>
+// PREENCHA com os dados do seu projeto Supabase (Project Settings > API). A chave "anon" é pública por projeto.
+const SUPABASE_URL="https://pjnbmvbcknmogznynnvz.supabase.co", SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),$=i=>document.getElementById(i);
+const msg=t=>$("m").textContent=t||"";
+function telaLogin(){$("sub").textContent="Entre ou crie sua conta.";$("v").innerHTML=`<input id="e" type="email" placeholder="E-mail" autocomplete="username"><input id="s" type="password" placeholder="Senha (mín. 8)" autocomplete="current-password"><button id="in">Entrar</button><button class="g" id="up">Criar conta</button>`;
+ $("in").onclick=async()=>{msg();const {error}=await sb.auth.signInWithPassword({email:$("e").value,password:$("s").value});error?msg("E-mail ou senha incorretos."):abrir()};
+ $("up").onclick=async()=>{msg();const {error}=await sb.auth.signUp({email:$("e").value,password:$("s").value});error?msg(error.message):msg("Conta criada. Se pedir, confirme o e-mail e depois entre.")}}
+function telaAssinar(){$("sub").textContent="Sua assinatura não está ativa.";$("v").innerHTML=`<button class="o" id="as">Assinar (mensal)</button><button id="re">Já paguei: verificar de novo</button><button class="g" id="ex">Sair</button>`;
+ $("as").onclick=async()=>{msg();const {data,error}=await sb.functions.invoke("criar-assinatura");data&&data.url?location.href=data.url:msg("Não foi possível iniciar o pagamento.")};
+ $("re").onclick=abrir;$("ex").onclick=async()=>{await sb.auth.signOut();telaLogin()}}
+async function abrir(){
+ const {data:{session}}=await sb.auth.getSession();if(!session)return telaLogin();
+ const {data}=await sb.from("app_conteudo").select("html").eq("id",1).maybeSingle();
+ if(!data)return telaAssinar();
+ document.body.innerHTML="";document.body.style.display="block";
+ const f=document.createElement("iframe");f.style.cssText="position:fixed;inset:0;width:100%;height:100%;border:0";f.srcdoc=data.html;document.body.appendChild(f);
+ const b=document.createElement("button");b.id="sair";b.textContent="Sair";b.onclick=async()=>{await sb.auth.signOut();location.reload()};document.body.appendChild(b)}
+abrir();
+</script></body></html>
