@@ -6,7 +6,7 @@
 body{margin:0;min-height:100vh;display:grid;place-items:center;background:#e6e9ec;font:15px/1.45 system-ui,sans-serif;color:#1c2630}
 .c{background:#fff;border:1px solid #cfd6dc;border-top:4px solid #f2a900;border-radius:6px;padding:26px;width:min(380px,92vw)}
 h1{margin:0 0 4px;font-size:22px}p{color:#5d6b78;margin:0 0 16px}
-input[type=email],input[type=password]{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px;border:1px solid #cfd6dc;border-radius:4px;font:inherit}
+input[type=email],input[type=password],input[type=text]{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px;border:1px solid #cfd6dc;border-radius:4px;font:inherit}
 button{width:100%;padding:11px;margin-top:6px;border:0;border-radius:4px;font:600 15px system-ui;cursor:pointer;background:#27384a;color:#fff}
 .o{background:#f2a900;color:#1c2630}.g{background:none;color:#5d6b78;border:1px solid #cfd6dc}
 label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,.ft a{color:#27384a}
@@ -18,8 +18,31 @@ label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,
 </style></head><body>
 <div class="c" id="box"><h1>Orçamento de Caldeiraria</h1><p id="sub">Entre ou crie sua conta.</p><div id="v"></div><div id="m"></div>
 <p class="ft">Portal v<span id="pv"></span> · <a href="termos.html" target="_blank">Termos de Uso</a> · <a href="privacidade.html" target="_blank">Privacidade</a></p></div>
+
+<!-- MODAL DE PIX -->
+<div id="pix-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:24px;border-radius:8px;width:min(340px,90vw);text-align:center;">
+    <h3 style="margin-top:0;font-size:18px;color:#1c2630;">Pagamento via PIX</h3>
+    <p style="font-size:13px;color:#5d6b78;margin-bottom:14px;">Escaneie o QR Code abaixo com o app do seu banco:</p>
+    
+    <div style="margin-bottom:14px;">
+      <img id="pix-qr-img" alt="QR Code Pix" style="width:180px;height:180px;border:1px solid #cfd6dc;padding:6px;border-radius:4px;" />
+    </div>
+
+    <div style="text-align:left;margin-bottom:14px;">
+      <label style="font-size:11px;font-weight:600;color:#5d6b78;">Pix Copia e Cola:</label>
+      <div style="display:flex;gap:6px;margin-top:4px;">
+        <input type="text" id="pix-copia-cola" readonly style="font-size:11px;padding:6px;background:#f1f3f5;border:1px solid #cfd6dc;border-radius:4px;" />
+        <button onclick="copiarPixCode()" style="width:auto;margin:0;padding:6px 10px;font-size:11px;background:#27384a;color:#fff;border:0;border-radius:4px;cursor:pointer;">Copiar</button>
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:#f2a900;font-weight:600;margin-bottom:14px;">Aguardando pagamento... (Aprova na hora)</p>
+    <button onclick="fecharModalPix()" class="g" style="margin-top:0;">Fechar</button>
+  </div>
+</div>
+
 <script>
-// Dados públicos do projeto Supabase (a chave "anon" é pública por projeto).
 const SUPABASE_URL="https://pjnbmvbcknmogznynnvz.supabase.co", SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw";
 const PORTAL_VERSAO="1.2.0", TERMOS_VERSAO="2026-10-22";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),$=i=>document.getElementById(i);
@@ -28,18 +51,64 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const fmt=d=>d?new Date(d).toLocaleDateString("pt-BR"):"-";
 $("pv").textContent=PORTAL_VERSAO;
 let IF=null;
-// Logo da empresa: o calculador pede/envia e o portal guarda na conta do usuário (tabela perfil, protegida por RLS).
+
 window.addEventListener("message",async e=>{if(!IF||e.source!==IF.contentWindow||e.origin!==location.origin)return;const d=e.data||{};
  if(d.t==="logo-pedir"){const {data}=await sb.from("perfil").select("logo").maybeSingle();if(data&&data.logo)IF.contentWindow.postMessage({t:"logo",url:data.logo},location.origin)}
  else if(d.t==="logo-salvar"&&typeof d.url==="string"&&d.url.startsWith("data:image/")&&d.url.length<300000){const {data:{session}}=await sb.auth.getSession();if(session)await sb.from("perfil").upsert({user_id:session.user.id,logo:d.url,atualizado_em:new Date().toISOString()})}});
+
 function telaLogin(){$("sub").textContent="Entre ou crie sua conta.";$("v").innerHTML=`<input id="e" type="email" placeholder="E-mail" autocomplete="username"><input id="s" type="password" placeholder="Senha (mín. 8)" autocomplete="current-password"><label class="t"><input type="checkbox" id="ac"> Li e aceito os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="privacidade.html" target="_blank">Política de Privacidade</a> (necessário para criar a conta).</label><button id="in">Entrar</button><button class="g" id="up">Criar conta</button>`;
  $("in").onclick=async()=>{msg();const {error}=await sb.auth.signInWithPassword({email:$("e").value,password:$("s").value});error?msg("E-mail ou senha incorretos."):abrir()};
  $("up").onclick=async()=>{msg();if(!$("ac").checked)return msg("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.");
   const {error}=await sb.auth.signUp({email:$("e").value,password:$("s").value,options:{data:{aceite_termos:TERMOS_VERSAO,aceite_em:new Date().toISOString()}}});
   error?msg(error.message):msg("Conta criada. Se pedir, confirme o e-mail e depois entre.")}}
-function telaAssinar(){$("sub").textContent="Sua assinatura não está ativa.";$("v").innerHTML=`<button class="o" id="as">Assinar (mensal)</button><button id="re">Já paguei: verificar de novo</button><button class="g" id="ex">Sair</button>`;
- $("as").onclick=async()=>{msg();const {data}=await sb.functions.invoke("criar-assinatura");data&&data.url?location.href=data.url:msg("Não foi possível iniciar o pagamento.")};
- $("re").onclick=abrir;$("ex").onclick=async()=>{await sb.auth.signOut();telaLogin()}}
+
+function telaAssinar(){
+  $("sub").textContent="Sua assinatura não está ativa.";
+  $("v").innerHTML=`
+    <button class="o" id="as">Assinar com Cartão (Mensal)</button>
+    <button id="as-pix" style="background:#00b19d;color:#fff;margin-top:6px;">Pagar com PIX (Aprovação Instantânea)</button>
+    <button id="re" style="margin-top:6px;">Já paguei: verificar de novo</button>
+    <button class="g" id="ex" style="margin-top:6px;">Sair</button>
+  `;
+
+  $("as").onclick=async()=>{
+    msg();
+    const {data}=await sb.functions.invoke("criar-assinatura", { body: { metodo: "cartao" } });
+    data&&data.url?location.href=data.url:msg("Não foi possível iniciar o pagamento.");
+  };
+
+  $("as-pix").onclick=async()=>{
+    msg("Gerando QR Code Pix...");
+    const {data, error}=await sb.functions.invoke("criar-assinatura", { body: { metodo: "pix" } });
+    if(error || !data || !data.qr_code_base64){
+      msg("Erro ao gerar Pix. Tente novamente.");
+      return;
+    }
+    msg("");
+    exibirModalPix(data.qr_code, data.qr_code_base64);
+  };
+
+  $("re").onclick=abrir;
+  $("ex").onclick=async()=>{await sb.auth.signOut();telaLogin()}
+}
+
+function exibirModalPix(code, base64){
+  document.getElementById("pix-qr-img").src = "data:image/jpeg;base64," + base64;
+  document.getElementById("pix-copia-cola").value = code;
+  document.getElementById("pix-modal").style.display = "flex";
+}
+
+function fecharModalPix(){
+  document.getElementById("pix-modal").style.display = "none";
+}
+
+function copiarPixCode(){
+  const input = document.getElementById("pix-copia-cola");
+  input.select();
+  navigator.clipboard.writeText(input.value);
+  alert("Código Pix copiado com sucesso!");
+}
+
 async function abrir(){
  const {data:{session}}=await sb.auth.getSession();if(!session)return telaLogin();
  const [a,c]=await Promise.all([sb.from("assinaturas").select("status,ativado_em,valid_until").maybeSingle(),sb.from("app_conteudo").select("html,versao").eq("id",1).maybeSingle()]);
