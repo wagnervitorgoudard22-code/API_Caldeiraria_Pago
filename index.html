@@ -524,9 +524,18 @@ function limparTimers() {
 }
 
 /* ---------------------------- telas ---------------------------- */
+function garantirCartao() {
+  let cartao = $("cartao");
+  if (cartao) return cartao;
+  // No modo aplicativo o corpo da tela é substituído pela barra e pela calculadora,
+  // então recriamos o cartão das telas de acesso antes de escrever nele.
+  const tela = $("tela");
+  tela.innerHTML = '<section class="cartao" id="cartao" aria-busy="true"></section>';
+  return $("cartao");
+}
 function mostrarCartao(html) {
   marcarForaDoApp();
-  const cartao = $("cartao");
+  const cartao = garantirCartao();
   cartao.setAttribute("aria-busy", "false");
   cartao.innerHTML = html;
 }
@@ -990,7 +999,7 @@ async function carregarPreco() {
 async function abrir() {
   limparTimers();
   marcarForaDoApp();
-  const cartao = $("cartao");
+  const cartao = garantirCartao();
   cartao.setAttribute("aria-busy", "true");
   cartao.innerHTML = '<p class="carregando" role="status">Verificando seu acesso…</p>';
   let r;
