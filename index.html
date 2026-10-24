@@ -9,13 +9,14 @@ h1{margin:0 0 4px;font-size:22px}p{color:#5d6b78;margin:0 0 16px}
 input[type=email],input[type=password],input[type=text]{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px;border:1px solid #cfd6dc;border-radius:4px;font:inherit}
 button{width:100%;padding:11px;margin-top:6px;border:0;border-radius:4px;font:600 15px system-ui;cursor:pointer;background:#27384a;color:#fff;transition:opacity .2s,background .2s}
 button:hover{opacity:.9}button:active{transform:scale(.98)}button:disabled{opacity:.6;cursor:wait}
-.o{background:#f2a900;color:#1c2630}.g{background:none;color:#5d6b78;border:1px solid #cfd6dc}.px{background:#00b19d;color:#fff}
+.o{background:#f2a900;color:#1c2630}.g{background:none;color:#5d6b78;border:1px solid #cfd6dc}.px{background:#00b19d;color:#fff}.danger{background:#b3261e;color:#fff}
 label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,.ft a{color:#27384a}
 .ft{font-size:12px;color:#5d6b78;margin:16px 0 0;text-align:center}
 #m{margin-top:12px;font-size:13px;color:#b3261e}
-#bar{position:fixed;top:0;left:0;right:0;height:38px;display:flex;align-items:center;gap:18px;padding:0 14px;background:#1c2630;color:#b9c4cf;font-size:12.5px;border-bottom:2px solid #f2a900;z-index:9;overflow-x:auto;white-space:nowrap}
+#bar{position:fixed;top:0;left:0;right:0;height:38px;display:flex;align-items:center;gap:14px;padding:0 14px;background:#1c2630;color:#b9c4cf;font-size:12.5px;border-bottom:2px solid #f2a900;z-index:9;overflow-x:auto;white-space:nowrap}
 #bar b{color:#fff}#bar .sp{flex:1}#bar a{color:#b9c4cf}
-#bar button{width:auto;margin:0;padding:4px 12px;font-size:12px;background:#3d5066}
+#bar button{width:auto;margin:0;padding:4px 10px;font-size:12px;background:#3d5066}
+#bar button.danger-btn{background:#b3261e}
 @media(max-width:600px){input[type=email],input[type=password],input[type=text],button{font-size:16px}.c{padding:20px}}
 </style></head><body>
 <div class="c" id="box"><h1>Orçamento de Caldeiraria</h1><p id="sub">Entre ou crie sua conta.</p><div id="v"></div><div id="m"></div>
@@ -46,7 +47,7 @@ label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,
 const SUPABASE_URL="https://pjnbmvbcknmogznynnvz.supabase.co", SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw";
 const PORTAL_VERSAO="1.3.0", TERMOS_VERSAO="2026-10-22";
 
-let PRECO_ATUAL = 49.90; // Valor padrão de segurança caso ocorra falha na conexão
+let PRECO_ATUAL = 49.90; // Valor padrão de segurança
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),$=i=>document.getElementById(i);
 const msg=t=>$("m")&&($("m").textContent=t||"");
@@ -72,6 +73,25 @@ async function buscarPrecoDinamico() {
   }
 }
 
+async function deletarMinhaConta() {
+  if (!confirm("Tem certeza que deseja excluir sua conta permanentemente?\n\nEsta ação apagará todos os seus dados e cancelará seu acesso. Um e-mail de confirmação será enviado.")) return;
+  try {
+    msg("Excluindo conta...");
+    const { data, error } = await sb.functions.invoke("deletar-conta");
+    if (error || (data && data.error)) {
+      alert("Erro ao excluir conta: " + (error?.message || data?.error || "Tente novamente."));
+      msg();
+      return;
+    }
+    alert("Sua conta foi excluída com sucesso! Enviamos um e-mail de confirmação.");
+    await sb.auth.signOut();
+    location.reload();
+  } catch (e) {
+    alert("Erro de conexão ao tentar excluir a conta.");
+    msg();
+  }
+}
+
 function telaLogin(){
   $("sub").textContent="Entre ou crie sua conta.";
   $("v").innerHTML=`<input id="e" type="email" placeholder="E-mail" autocomplete="username"><input id="s" type="password" placeholder="Senha (mín. 8)" autocomplete="current-password"><label class="t"><input type="checkbox" id="ac"> Li e aceito os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="privacidade.html" target="_blank">Política de Privacidade</a> (necessário para criar a conta).</label><button id="in">Entrar</button><button class="g" id="up">Criar conta</button>`;
@@ -85,7 +105,7 @@ async function telaAssinar(){
   await buscarPrecoDinamico();
   const rotCartao=`Assinar com Cartão · ${brl(PRECO_ATUAL)}/mês`, rotPix=`Pagar com PIX · ${brl(PRECO_ATUAL)}`;
   $("sub").textContent="Sua assinatura não está ativa.";
-  $("v").innerHTML=`<button class="o" id="as">${rotCartao}</button><button class="px" id="as-pix">${rotPix}</button><button id="re">Já paguei: verificar de novo</button><button class="g" id="ex">Sair</button>`;
+  $("v").innerHTML=`<button class="o" id="as">${rotCartao}</button><button class="px" id="as-pix">${rotPix}</button><button id="re">Já paguei: verificar de novo</button><button class="danger" id="del-acc">Excluir Minha Conta</button><button class="g" id="ex">Sair</button>`;
   
   $("as").onclick=async()=>{
     const b=$("as");if(b.disabled)return;msg();b.disabled=true;b.textContent="Redirecionando...";
@@ -100,6 +120,7 @@ async function telaAssinar(){
     exibirModalPix(data.qr_code,data.qr_code_base64,Number(data.valor)>0?Number(data.valor):PRECO_ATUAL);
   };
   $("re").onclick=async()=>{const b=$("re");b.disabled=true;b.textContent="Verificando...";await abrir();const n=$("re");if(n){n.disabled=false;n.textContent="Já paguei: verificar de novo"}};
+  $("del-acc").onclick=deletarMinhaConta;
   $("ex").onclick=async()=>{await sb.auth.signOut();telaLogin()}
 }
 
@@ -137,10 +158,11 @@ async function abrir(){
  const exp=new Date(a.data.valid_until),dias=Math.max(0,Math.ceil((exp-Date.now())/864e5));
  document.body.innerHTML="";document.body.style.display="block";
  const bar=document.createElement("div");bar.id="bar";
- bar.innerHTML=`<b>Calculadora de Caldeiraria</b><span>Versão <b>${esc(c.data.versao||"-")}</b></span><span>Ativação: <b>${fmt(a.data.ativado_em)}</b></span><span>Acesso até: <b style="color:${dias<=5?"#f2a900":"#fff"}">${fmt(exp)}</b> (${dias} dia${dias===1?"":"s"})</span><span class="sp"></span><a href="termos.html" target="_blank">Termos de Uso</a><a href="privacidade.html" target="_blank">Privacidade</a><button id="sair">Sair</button>`;
+ bar.innerHTML=`<b>Calculadora de Caldeiraria</b><span>Versão <b>${esc(c.data.versao||"-")}</b></span><span>Ativação: <b>${fmt(a.data.ativado_em)}</b></span><span>Acesso até: <b style="color:${dias<=5?"#f2a900":"#fff"}">${fmt(exp)}</b> (${dias} dia${dias===1?"":"s"})</span><span class="sp"></span><a href="termos.html" target="_blank">Termos de Uso</a><a href="privacidade.html" target="_blank">Privacidade</a><button id="del-bar" class="danger-btn">Excluir Conta</button><button id="sair">Sair</button>`;
  document.body.appendChild(bar);
  const f=document.createElement("iframe");f.style.cssText="position:fixed;top:38px;left:0;width:100%;height:calc(100% - 38px);border:0";IF=f;f.srcdoc=c.data.html;document.body.appendChild(f);
  setInterval(async()=>{const r=await sb.from("app_conteudo").select("id").eq("id",1).maybeSingle();if(!r.data||exp<new Date())location.reload()},3e5);
+ document.getElementById("del-bar").onclick=deletarMinhaConta;
  document.getElementById("sair").onclick=async()=>{await sb.auth.signOut();location.reload()}}
 abrir();
 </script></body></html>
