@@ -7,7 +7,9 @@ body{margin:0;min-height:100vh;display:grid;place-items:center;background:#e6e9e
 .c{background:#fff;border:1px solid #cfd6dc;border-top:4px solid #f2a900;border-radius:6px;padding:26px;width:min(380px,92vw)}
 h1{margin:0 0 4px;font-size:22px}p{color:#5d6b78;margin:0 0 16px}
 input[type=email],input[type=password],input[type=text]{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px;border:1px solid #cfd6dc;border-radius:4px;font:inherit}
-button{width:100%;padding:11px;margin-top:6px;border:0;border-radius:4px;font:600 15px system-ui;cursor:pointer;background:#27384a;color:#fff}
+button{width:100%;padding:11px;margin-top:6px;border:0;border-radius:4px;font:600 15px system-ui;cursor:pointer;background:#27384a;color:#fff;transition:opacity 0.2s, background 0.2s}
+button:hover{opacity:0.9}
+button:active{transform:scale(0.98)}
 .o{background:#f2a900;color:#1c2630}.g{background:none;color:#5d6b78;border:1px solid #cfd6dc}
 label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,.ft a{color:#27384a}
 .ft{font-size:12px;color:#5d6b78;margin:16px 0 0;text-align:center}
@@ -23,11 +25,14 @@ label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,
 <div id="pix-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#fff;padding:24px;border-radius:8px;width:min(340px,90vw);text-align:center;">
     <h3 style="margin-top:0;font-size:18px;color:#1c2630;">Pagamento via PIX</h3>
-    <p style="font-size:13px;color:#5d6b78;margin-bottom:14px;">Escaneie o QR Code abaixo com o app do seu banco:</p>
+    <p style="font-size:13px;color:#5d6b78;margin-bottom:10px;">Escaneie o QR Code abaixo:</p>
     
-    <div style="margin-bottom:14px;">
-      <img id="pix-qr-img" alt="QR Code Pix" style="width:180px;height:180px;border:1px solid #cfd6dc;padding:6px;border-radius:4px;" />
+    <div style="margin-bottom:10px;">
+      <img id="pix-qr-img" alt="QR Code Pix" style="width:170px;height:170px;border:1px solid #cfd6dc;padding:6px;border-radius:4px;" />
     </div>
+
+    <!-- Cronômetro e Alerta de Validade -->
+    <div id="pix-timer" style="font-size:13px;color:#b3261e;font-weight:600;margin-bottom:10px;">Expira em: 05:00</div>
 
     <div style="text-align:left;margin-bottom:14px;">
       <label style="font-size:11px;font-weight:600;color:#5d6b78;">Pix Copia e Cola:</label>
@@ -37,8 +42,8 @@ label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,
       </div>
     </div>
 
-    <p style="font-size:12px;color:#f2a900;font-weight:600;margin-bottom:14px;">Aguardando pagamento... (Aprova na hora)</p>
-    <button onclick="fecharModalPix()" class="g" style="margin-top:0;">Fechar</button>
+    <p style="font-size:12px;color:#00b19d;font-weight:600;margin-bottom:14px;">Aguardando pagamento... (Aprova automático)</p>
+    <button onclick="fecharModalPix()" class="g" style="margin-top:0;">Cancelar / Fechar</button>
   </div>
 </div>
 
@@ -50,7 +55,7 @@ const msg=t=>$("m").textContent=t||"";
 const esc=t=>String(t).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const fmt=d=>d?new Date(d).toLocaleDateString("pt-BR"):"-";
 $("pv").textContent=PORTAL_VERSAO;
-let IF=null;
+let IF=null, pixInterval=null, timerInterval=null;
 
 window.addEventListener("message",async e=>{if(!IF||e.source!==IF.contentWindow||e.origin!==location.origin)return;const d=e.data||{};
  if(d.t==="logo-pedir"){const {data}=await sb.from("perfil").select("logo").maybeSingle();if(data&&data.logo)IF.contentWindow.postMessage({t:"logo",url:data.logo},location.origin)}
@@ -73,22 +78,29 @@ function telaAssinar(){
 
   $("as").onclick=async()=>{
     msg();
+    $("as").textContent = "A Redirecionar...";
     const {data}=await sb.functions.invoke("criar-assinatura", { body: { metodo: "cartao" } });
-    data&&data.url?location.href=data.url:msg("Não foi possível iniciar o pagamento.");
+    data&&data.url?location.href=data.url:(msg("Não foi possível iniciar o pagamento."), $("as").textContent="Assinar com Cartão (Mensal)");
   };
 
   $("as-pix").onclick=async()=>{
-    msg("Gerando QR Code Pix...");
+    msg();
+    $("as-pix").textContent = "A gerar QR Code...";
     const {data, error}=await sb.functions.invoke("criar-assinatura", { body: { metodo: "pix" } });
+    $("as-pix").textContent = "Pagar com PIX (Aprovação Instantânea)";
     if(error || !data || !data.qr_code_base64){
       msg("Erro ao gerar Pix. Tente novamente.");
       return;
     }
-    msg("");
     exibirModalPix(data.qr_code, data.qr_code_base64);
   };
 
-  $("re").onclick=abrir;
+  $("re").onclick=async()=>{
+    $("re").textContent = "A verificar...";
+    await abrir();
+    $("re").textContent = "Já paguei: verificar de novo";
+  };
+  
   $("ex").onclick=async()=>{await sb.auth.signOut();telaLogin()}
 }
 
@@ -96,10 +108,42 @@ function exibirModalPix(code, base64){
   document.getElementById("pix-qr-img").src = "data:image/jpeg;base64," + base64;
   document.getElementById("pix-copia-cola").value = code;
   document.getElementById("pix-modal").style.display = "flex";
+
+  // Inicia contagem regressiva de 5 minutos (300 segundos)
+  let tempoRestante = 300;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    let min = Math.floor(tempoRestante / 60);
+    let seg = tempoRestante % 60;
+    document.getElementById("pix-timer").textContent = `Expira em: ${String(min).padStart(2,'0')}:${String(seg).padStart(2,'0')}`;
+    tempoRestante--;
+    if (tempoRestante < 0) {
+      clearInterval(timerInterval);
+      fecharModalPix();
+      alert("O tempo do Pix expirou. Gere um novo código.");
+    }
+  }, 1000);
+
+  // Verifica a cada 5 segundos se o pagamento foi aprovado automaticamente
+  clearInterval(pixInterval);
+  pixInterval = setInterval(async () => {
+    const {data:{session}} = await sb.auth.getSession();
+    if(!session) return;
+    const {data} = await sb.from("assinaturas").select("valid_until").maybeSingle();
+    if(data && data.valid_until && new Date(data.valid_until) > new Date()){
+      // Pagamento aprovado!
+      clearInterval(pixInterval);
+      clearInterval(timerInterval);
+      fecharModalPix();
+      abrir(); // Abre a aplicação imediatamente
+    }
+  }, 5000);
 }
 
 function fecharModalPix(){
   document.getElementById("pix-modal").style.display = "none";
+  clearInterval(pixInterval);
+  clearInterval(timerInterval);
 }
 
 function copiarPixCode(){
@@ -112,8 +156,9 @@ function copiarPixCode(){
 async function abrir(){
  const {data:{session}}=await sb.auth.getSession();if(!session)return telaLogin();
  const [a,c]=await Promise.all([sb.from("assinaturas").select("status,ativado_em,valid_until").maybeSingle(),sb.from("app_conteudo").select("html,versao").eq("id",1).maybeSingle()]);
- if(!c.data)return telaAssinar();
- const exp=a.data?new Date(a.data.valid_until):null,dias=exp?Math.max(0,Math.ceil((exp-Date.now())/864e5)):0;
+ if(!c.data || !a.data || !a.data.valid_until || new Date(a.data.valid_until) < new Date()) return telaAssinar();
+ 
+ const exp=new Date(a.data.valid_until),dias=Math.max(0,Math.ceil((exp-Date.now())/864e5));
  document.body.innerHTML="";document.body.style.display="block";
  const bar=document.createElement("div");bar.id="bar";
  bar.innerHTML=`<b>Calculadora de Caldeiraria</b><span>Versão <b>${esc(c.data.versao||"-")}</b></span><span>Ativação: <b>${fmt(a.data&&a.data.ativado_em)}</b></span><span>Acesso até: <b style="color:${dias<=5?"#f2a900":"#fff"}">${fmt(exp)}</b> (${dias} dia${dias===1?"":"s"})</span><span class="sp"></span><a href="termos.html" target="_blank">Termos de Uso</a><a href="privacidade.html" target="_blank">Privacidade</a><button id="sair">Sair</button>`;
