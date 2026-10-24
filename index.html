@@ -47,7 +47,7 @@ label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,
 const SUPABASE_URL="https://pjnbmvbcknmogznynnvz.supabase.co", SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw";
 const PORTAL_VERSAO="1.3.0", TERMOS_VERSAO="2026-10-22";
 
-let PRECO_ATUAL = 49.90; // Valor padrão de segurança
+let PRECO_ATUAL = 49.90;
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),$=i=>document.getElementById(i);
 const msg=t=>$("m")&&($("m").textContent=t||"");
@@ -65,12 +65,8 @@ window.addEventListener("message",async e=>{if(!IF||e.source!==IF.contentWindow|
 async function buscarPrecoDinamico() {
   try {
     const { data } = await sb.functions.invoke("criar-assinatura", { body: { acao: "obter_preco" } });
-    if (data && data.preco) {
-      PRECO_ATUAL = Number(data.preco);
-    }
-  } catch (e) {
-    console.error("Usando preço padrão de segurança", e);
-  }
+    if (data && data.preco) PRECO_ATUAL = Number(data.preco);
+  } catch (e) { console.error("Usando preço padrão", e); }
 }
 
 async function deletarMinhaConta() {
@@ -93,12 +89,63 @@ async function deletarMinhaConta() {
 }
 
 function telaLogin(){
-  $("sub").textContent="Entre ou crie sua conta.";
-  $("v").innerHTML=`<input id="e" type="email" placeholder="E-mail" autocomplete="username"><input id="s" type="password" placeholder="Senha (mín. 8)" autocomplete="current-password"><label class="t"><input type="checkbox" id="ac"> Li e aceito os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="privacidade.html" target="_blank">Política de Privacidade</a> (necessário para criar a conta).</label><button id="in">Entrar</button><button class="g" id="up">Criar conta</button>`;
-  $("in").onclick=async()=>{msg();const {error}=await sb.auth.signInWithPassword({email:$("e").value,password:$("s").value});error?msg("E-mail ou senha incorretos."):abrir()};
-  $("up").onclick=async()=>{msg();if(!$("ac").checked)return msg("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.");
-  const {error}=await sb.auth.signUp({email:$("e").value,password:$("s").value,options:{data:{aceite_termos:TERMOS_VERSAO,aceite_em:new Date().toISOString()}}});
-  error?msg(error.message):msg("Conta criada. Se pedir, confirme o e-mail e depois entre.")}
+  $("sub").textContent = "Entre ou crie sua conta.";
+  $("v").innerHTML = `
+    <input id="e" type="email" placeholder="E-mail" autocomplete="username">
+    
+    <div style="position:relative; margin-bottom:10px;">
+      <input id="s" type="password" placeholder="Senha (mín. 8)" autocomplete="current-password" style="margin:0; padding-right:40px;">
+      <button type="button" onclick="toggleSenha('s', 'eye-icon-1')" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); width:auto; padding:4px 8px; margin:0; background:none; border:none; color:#5d6b78; cursor:pointer; font-size:16px;" title="Mostrar/Ocultar senha">
+        <span id="eye-icon-1">👁️</span>
+      </button>
+    </div>
+
+    <div id="box-confirma-senha" style="display:none; position:relative; margin-bottom:10px;">
+      <input id="s2" type="password" placeholder="Confirme sua senha" autocomplete="new-password" style="margin:0; padding-right:40px;">
+      <button type="button" onclick="toggleSenha('s2', 'eye-icon-2')" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); width:auto; padding:4px 8px; margin:0; background:none; border:none; color:#5d6b78; cursor:pointer; font-size:16px;" title="Mostrar/Ocultar senha">
+        <span id="eye-icon-2">👁️</span>
+      </button>
+    </div>
+
+    <label class="t"><input type="checkbox" id="ac"> Li e aceito os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="privacidade.html" target="_blank">Política de Privacidade</a> (necessário para criar a conta).</label>
+    
+    <button id="in">Entrar</button>
+    <button class="g" id="up">Criar conta</button>
+  `;
+
+  window.toggleSenha = (inputId, iconId) => {
+    const input = $(inputId), icon = $(iconId);
+    if (input.type === "password") { input.type = "text"; icon.textContent = "🙈"; }
+    else { input.type = "password"; icon.textContent = "👁️"; }
+  };
+
+  $("in").onclick = async () => {
+    msg();
+    $("box-confirma-senha").style.display = "none";
+    const { error } = await sb.auth.signInWithPassword({ email: $("e").value, password: $("s").value });
+    error ? msg("E-mail ou senha incorretos.") : abrir();
+  };
+
+  $("up").onclick = async () => {
+    msg();
+    const boxConfirma = $("box-confirma-senha");
+    if (boxConfirma.style.display === "none") {
+      boxConfirma.style.display = "block";
+      msg("Confirme sua senha abaixo para prosseguir com o cadastro.");
+      return;
+    }
+    const email = $("e").value.trim(), senha = $("s").value, senhaConfirma = $("s2").value;
+    if (!email || !senha) return msg("Preencha todos os campos.");
+    if (senha.length < 8) return msg("A senha deve ter no mínimo 8 caracteres.");
+    if (senha !== senhaConfirma) return msg("As senhas não coincidem. Digite novamente.");
+    if (!$("ac").checked) return msg("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.");
+
+    const { error } = await sb.auth.signUp({
+      email: email, password: senha,
+      options: { data: { aceite_termos: TERMOS_VERSAO, aceite_em: new Date().toISOString() } }
+    });
+    error ? msg(error.message) : msg("Conta criada com sucesso! Se necessário, confirme no seu e-mail.");
+  };
 }
 
 async function telaAssinar(){
@@ -148,7 +195,7 @@ function fecharModalPix(){const m=$("pix-modal");if(m)m.style.display="none";cle
 async function copiarPixCode(){
   const i=$("pix-copia-cola");
   try{await navigator.clipboard.writeText(i.value);alert("Código Pix copiado.")}
-  catch(e){i.select();alert("Selecionei o código. Copie manualmente (Ctrl+C ou segure e escolha Copiar).")}
+  catch(e){i.select();alert("Selecionei o código. Copie manualmente.")}
 }
 
 async function abrir(){
