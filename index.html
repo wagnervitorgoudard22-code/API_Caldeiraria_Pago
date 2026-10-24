@@ -7,55 +7,55 @@ body{margin:0;min-height:100vh;display:grid;place-items:center;background:#e6e9e
 .c{background:#fff;border:1px solid #cfd6dc;border-top:4px solid #f2a900;border-radius:6px;padding:26px;width:min(380px,92vw)}
 h1{margin:0 0 4px;font-size:22px}p{color:#5d6b78;margin:0 0 16px}
 input[type=email],input[type=password],input[type=text]{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px;border:1px solid #cfd6dc;border-radius:4px;font:inherit}
-button{width:100%;padding:11px;margin-top:6px;border:0;border-radius:4px;font:600 15px system-ui;cursor:pointer;background:#27384a;color:#fff;transition:opacity 0.2s, background 0.2s}
-button:hover{opacity:0.9}
-button:active{transform:scale(0.98)}
-.o{background:#f2a900;color:#1c2630}.g{background:none;color:#5d6b78;border:1px solid #cfd6dc}
+button{width:100%;padding:11px;margin-top:6px;border:0;border-radius:4px;font:600 15px system-ui;cursor:pointer;background:#27384a;color:#fff;transition:opacity .2s,background .2s}
+button:hover{opacity:.9}button:active{transform:scale(.98)}button:disabled{opacity:.6;cursor:wait}
+.o{background:#f2a900;color:#1c2630}.g{background:none;color:#5d6b78;border:1px solid #cfd6dc}.px{background:#00b19d;color:#fff}
 label.t{display:block;font-size:12.5px;color:#5d6b78;margin:4px 0 6px}label.t a,.ft a{color:#27384a}
 .ft{font-size:12px;color:#5d6b78;margin:16px 0 0;text-align:center}
 #m{margin-top:12px;font-size:13px;color:#b3261e}
 #bar{position:fixed;top:0;left:0;right:0;height:38px;display:flex;align-items:center;gap:18px;padding:0 14px;background:#1c2630;color:#b9c4cf;font-size:12.5px;border-bottom:2px solid #f2a900;z-index:9;overflow-x:auto;white-space:nowrap}
 #bar b{color:#fff}#bar .sp{flex:1}#bar a{color:#b9c4cf}
 #bar button{width:auto;margin:0;padding:4px 12px;font-size:12px;background:#3d5066}
+@media(max-width:600px){input[type=email],input[type=password],input[type=text],button{font-size:16px}.c{padding:20px}}
 </style></head><body>
 <div class="c" id="box"><h1>Orçamento de Caldeiraria</h1><p id="sub">Entre ou crie sua conta.</p><div id="v"></div><div id="m"></div>
 <p class="ft">Portal v<span id="pv"></span> · <a href="termos.html" target="_blank">Termos de Uso</a> · <a href="privacidade.html" target="_blank">Privacidade</a></p></div>
 
 <!-- MODAL DE PIX -->
-<div id="pix-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;padding:24px;border-radius:8px;width:min(340px,90vw);text-align:center;">
+<div id="pix-modal" role="dialog" aria-modal="true" aria-label="Pagamento via Pix" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;overflow:auto;">
+  <div style="background:#fff;padding:24px;border-radius:8px;width:min(340px,90vw);text-align:center;margin:16px 0;">
     <h3 style="margin-top:0;font-size:18px;color:#1c2630;">Pagamento via PIX</h3>
+    <div style="margin:0 0 4px;font-size:12px;color:#5d6b78;">Valor a pagar</div>
+    <div id="pix-valor" style="font-size:30px;font-weight:700;color:#1c2630;margin-bottom:10px;">R$ 0,00</div>
     <p style="font-size:13px;color:#5d6b78;margin-bottom:10px;">Escaneie o QR Code abaixo:</p>
-    
-    <div style="margin-bottom:10px;">
-      <img id="pix-qr-img" alt="QR Code Pix" style="width:170px;height:170px;border:1px solid #cfd6dc;padding:6px;border-radius:4px;" />
-    </div>
-
-    <!-- Cronômetro e Alerta de Validade -->
+    <div style="margin-bottom:10px;"><img id="pix-qr-img" alt="QR Code Pix" style="width:170px;height:170px;border:1px solid #cfd6dc;padding:6px;border-radius:4px;" /></div>
     <div id="pix-timer" style="font-size:13px;color:#b3261e;font-weight:600;margin-bottom:10px;">Expira em: 05:00</div>
-
     <div style="text-align:left;margin-bottom:14px;">
       <label style="font-size:11px;font-weight:600;color:#5d6b78;">Pix Copia e Cola:</label>
       <div style="display:flex;gap:6px;margin-top:4px;">
         <input type="text" id="pix-copia-cola" readonly style="font-size:11px;padding:6px;background:#f1f3f5;border:1px solid #cfd6dc;border-radius:4px;" />
-        <button onclick="copiarPixCode()" style="width:auto;margin:0;padding:6px 10px;font-size:11px;background:#27384a;color:#fff;border:0;border-radius:4px;cursor:pointer;">Copiar</button>
+        <button onclick="copiarPixCode()" style="width:auto;margin:0;padding:6px 10px;font-size:12px;background:#27384a;color:#fff;border:0;border-radius:4px;cursor:pointer;">Copiar</button>
       </div>
     </div>
-
-    <p style="font-size:12px;color:#00b19d;font-weight:600;margin-bottom:14px;">Aguardando pagamento... (Aprova automático)</p>
+    <p style="font-size:12px;color:#00806f;font-weight:600;margin-bottom:14px;">Aguardando pagamento... (libera automaticamente)</p>
     <button onclick="fecharModalPix()" class="g" style="margin-top:0;">Cancelar / Fechar</button>
   </div>
 </div>
 
 <script>
 const SUPABASE_URL="https://pjnbmvbcknmogznynnvz.supabase.co", SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw";
-const PORTAL_VERSAO="1.2.0", TERMOS_VERSAO="2026-10-22";
+const PORTAL_VERSAO="1.3.0", TERMOS_VERSAO="2026-10-22";
+// ATENÇÃO: estes valores são só para EXIBIR na tela. O valor cobrado de verdade é definido no servidor (segredo PRECO).
+// Mantenha iguais. Se a função devolver "valor", ele tem prioridade.
+const PRECO_CARTAO=49.90, PRECO_PIX=49.90;
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),$=i=>document.getElementById(i);
-const msg=t=>$("m").textContent=t||"";
+const msg=t=>$("m")&&($("m").textContent=t||"");
 const esc=t=>String(t).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const fmt=d=>d?new Date(d).toLocaleDateString("pt-BR"):"-";
+const brl=v=>Number(v).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 $("pv").textContent=PORTAL_VERSAO;
 let IF=null, pixInterval=null, timerInterval=null;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")fecharModalPix()});
 
 window.addEventListener("message",async e=>{if(!IF||e.source!==IF.contentWindow||e.origin!==location.origin)return;const d=e.data||{};
  if(d.t==="logo-pedir"){const {data}=await sb.from("perfil").select("logo").maybeSingle();if(data&&data.logo)IF.contentWindow.postMessage({t:"logo",url:data.logo},location.origin)}
@@ -68,103 +68,63 @@ function telaLogin(){$("sub").textContent="Entre ou crie sua conta.";$("v").inne
   error?msg(error.message):msg("Conta criada. Se pedir, confirme o e-mail e depois entre.")}}
 
 function telaAssinar(){
+  const rotCartao=`Assinar com Cartão · ${brl(PRECO_CARTAO)}/mês`, rotPix=`Pagar com PIX · ${brl(PRECO_PIX)}`;
   $("sub").textContent="Sua assinatura não está ativa.";
-  $("v").innerHTML=`
-    <button class="o" id="as">Assinar com Cartão (Mensal)</button>
-    <button id="as-pix" style="background:#00b19d;color:#fff;margin-top:6px;">Pagar com PIX (Aprovação Instantânea)</button>
-    <button id="re" style="margin-top:6px;">Já paguei: verificar de novo</button>
-    <button class="g" id="ex" style="margin-top:6px;">Sair</button>
-  `;
-
+  $("v").innerHTML=`<button class="o" id="as">${rotCartao}</button><button class="px" id="as-pix">${rotPix}</button><button id="re">Já paguei: verificar de novo</button><button class="g" id="ex">Sair</button>`;
   $("as").onclick=async()=>{
-    msg();
-    $("as").textContent = "A Redirecionar...";
-    const {data}=await sb.functions.invoke("criar-assinatura", { body: { metodo: "cartao" } });
-    data&&data.url?location.href=data.url:(msg("Não foi possível iniciar o pagamento."), $("as").textContent="Assinar com Cartão (Mensal)");
+    const b=$("as");if(b.disabled)return;msg();b.disabled=true;b.textContent="Redirecionando...";
+    const {data}=await sb.functions.invoke("criar-assinatura",{body:{metodo:"cartao"}});
+    if(data&&data.url)location.href=data.url;else{msg("Não foi possível iniciar o pagamento.");b.disabled=false;b.textContent=rotCartao}
   };
-
   $("as-pix").onclick=async()=>{
-    msg();
-    $("as-pix").textContent = "A gerar QR Code...";
-    const {data, error}=await sb.functions.invoke("criar-assinatura", { body: { metodo: "pix" } });
-    $("as-pix").textContent = "Pagar com PIX (Aprovação Instantânea)";
-    if(error || !data || !data.qr_code_base64){
-      msg("Erro ao gerar Pix. Tente novamente.");
-      return;
-    }
-    exibirModalPix(data.qr_code, data.qr_code_base64);
+    const b=$("as-pix");if(b.disabled)return;msg();b.disabled=true;b.textContent="Gerando QR Code...";
+    const {data,error}=await sb.functions.invoke("criar-assinatura",{body:{metodo:"pix"}});
+    b.disabled=false;b.textContent=rotPix;
+    if(error||!data||!data.qr_code_base64||!data.qr_code){msg("Erro ao gerar o Pix. Tente novamente.");return}
+    exibirModalPix(data.qr_code,data.qr_code_base64,Number(data.valor)>0?Number(data.valor):PRECO_PIX);
   };
-
-  $("re").onclick=async()=>{
-    $("re").textContent = "A verificar...";
-    await abrir();
-    $("re").textContent = "Já paguei: verificar de novo";
-  };
-  
+  $("re").onclick=async()=>{const b=$("re");b.disabled=true;b.textContent="Verificando...";await abrir();const n=$("re");if(n){n.disabled=false;n.textContent="Já paguei: verificar de novo"}};
   $("ex").onclick=async()=>{await sb.auth.signOut();telaLogin()}
 }
 
-function exibirModalPix(code, base64){
-  document.getElementById("pix-qr-img").src = "data:image/jpeg;base64," + base64;
-  document.getElementById("pix-copia-cola").value = code;
-  document.getElementById("pix-modal").style.display = "flex";
-
-  // Inicia contagem regressiva de 5 minutos (300 segundos)
-  let tempoRestante = 300;
+function exibirModalPix(code,base64,valor){
+  $("pix-qr-img").src="data:image/png;base64,"+base64;
+  $("pix-copia-cola").value=code;
+  $("pix-valor").textContent=brl(valor);
+  $("pix-modal").style.display="flex";
+  let restante=300;
   clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    let min = Math.floor(tempoRestante / 60);
-    let seg = tempoRestante % 60;
-    document.getElementById("pix-timer").textContent = `Expira em: ${String(min).padStart(2,'0')}:${String(seg).padStart(2,'0')}`;
-    tempoRestante--;
-    if (tempoRestante < 0) {
-      clearInterval(timerInterval);
-      fecharModalPix();
-      alert("O tempo do Pix expirou. Gere um novo código.");
-    }
-  }, 1000);
-
-  // Verifica a cada 5 segundos se o pagamento foi aprovado automaticamente
+  timerInterval=setInterval(()=>{
+    $("pix-timer").textContent=`Expira em: ${String(Math.floor(restante/60)).padStart(2,"0")}:${String(restante%60).padStart(2,"0")}`;
+    restante--;
+    if(restante<0){fecharModalPix();alert("O tempo do Pix expirou. Gere um novo código.")}
+  },1000);
   clearInterval(pixInterval);
-  pixInterval = setInterval(async () => {
-    const {data:{session}} = await sb.auth.getSession();
-    if(!session) return;
-    const {data} = await sb.from("assinaturas").select("valid_until").maybeSingle();
-    if(data && data.valid_until && new Date(data.valid_until) > new Date()){
-      // Pagamento aprovado!
-      clearInterval(pixInterval);
-      clearInterval(timerInterval);
-      fecharModalPix();
-      abrir(); // Abre a aplicação imediatamente
-    }
-  }, 5000);
+  pixInterval=setInterval(async()=>{
+    const {data:{session}}=await sb.auth.getSession();if(!session)return;
+    const {data}=await sb.from("assinaturas").select("valid_until").maybeSingle();
+    if(data&&data.valid_until&&new Date(data.valid_until)>new Date()){fecharModalPix();abrir()}
+  },5000);
 }
-
-function fecharModalPix(){
-  document.getElementById("pix-modal").style.display = "none";
-  clearInterval(pixInterval);
-  clearInterval(timerInterval);
-}
-
-function copiarPixCode(){
-  const input = document.getElementById("pix-copia-cola");
-  input.select();
-  navigator.clipboard.writeText(input.value);
-  alert("Código Pix copiado com sucesso!");
+function fecharModalPix(){const m=$("pix-modal");if(m)m.style.display="none";clearInterval(pixInterval);clearInterval(timerInterval)}
+async function copiarPixCode(){
+  const i=$("pix-copia-cola");
+  try{await navigator.clipboard.writeText(i.value);alert("Código Pix copiado.")}
+  catch(e){i.select();alert("Selecionei o código. Copie manualmente (Ctrl+C ou segure e escolha Copiar).")}
 }
 
 async function abrir(){
  const {data:{session}}=await sb.auth.getSession();if(!session)return telaLogin();
  const [a,c]=await Promise.all([sb.from("assinaturas").select("status,ativado_em,valid_until").maybeSingle(),sb.from("app_conteudo").select("html,versao").eq("id",1).maybeSingle()]);
- if(!c.data || !a.data || !a.data.valid_until || new Date(a.data.valid_until) < new Date()) return telaAssinar();
- 
+ if(!c.data||!a.data||!a.data.valid_until||new Date(a.data.valid_until)<new Date())return telaAssinar();
  const exp=new Date(a.data.valid_until),dias=Math.max(0,Math.ceil((exp-Date.now())/864e5));
  document.body.innerHTML="";document.body.style.display="block";
  const bar=document.createElement("div");bar.id="bar";
- bar.innerHTML=`<b>Calculadora de Caldeiraria</b><span>Versão <b>${esc(c.data.versao||"-")}</b></span><span>Ativação: <b>${fmt(a.data&&a.data.ativado_em)}</b></span><span>Acesso até: <b style="color:${dias<=5?"#f2a900":"#fff"}">${fmt(exp)}</b> (${dias} dia${dias===1?"":"s"})</span><span class="sp"></span><a href="termos.html" target="_blank">Termos de Uso</a><a href="privacidade.html" target="_blank">Privacidade</a><button id="sair">Sair</button>`;
+ bar.innerHTML=`<b>Calculadora de Caldeiraria</b><span>Versão <b>${esc(c.data.versao||"-")}</b></span><span>Ativação: <b>${fmt(a.data.ativado_em)}</b></span><span>Acesso até: <b style="color:${dias<=5?"#f2a900":"#fff"}">${fmt(exp)}</b> (${dias} dia${dias===1?"":"s"})</span><span class="sp"></span><a href="termos.html" target="_blank">Termos de Uso</a><a href="privacidade.html" target="_blank">Privacidade</a><button id="sair">Sair</button>`;
  document.body.appendChild(bar);
  const f=document.createElement("iframe");f.style.cssText="position:fixed;top:38px;left:0;width:100%;height:calc(100% - 38px);border:0";IF=f;f.srcdoc=c.data.html;document.body.appendChild(f);
- setInterval(async()=>{const r=await sb.from("app_conteudo").select("id").eq("id",1).maybeSingle();if(!r.data)location.reload()},3e5);
+ // reverifica a cada 5 min: se a assinatura venceu, recarrega e volta para a tela de pagamento
+ setInterval(async()=>{const r=await sb.from("app_conteudo").select("id").eq("id",1).maybeSingle();if(!r.data||exp<new Date())location.reload()},3e5);
  document.getElementById("sair").onclick=async()=>{await sb.auth.signOut();location.reload()}}
 abrir();
 </script></body></html>
