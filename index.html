@@ -36,7 +36,6 @@
   h2{margin:0;font-size:16px}
   a{color:var(--azul-700)}
   :focus-visible{outline:2px solid var(--azul-700);outline-offset:2px}
-  .oculto-visual{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
   /* ---------- Estrutura ---------- */
   .tela{width:100%;padding:24px 16px;display:grid;place-items:center}
@@ -73,10 +72,6 @@
     background:none;border:0;border-radius:var(--raio-sm);color:var(--cinza-600);cursor:pointer
   }
   .btn-olho:hover{background:var(--cinza-100);color:var(--azul-700)}
-  .dica{font-size:11.5px;color:var(--cinza-600);margin:6px 0 0}
-  .regras{list-style:none;margin:8px 0 0;padding:0;font-size:11.5px;color:var(--cinza-600)}
-  .regras li{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-  .regras li.ok{color:var(--verde-700)}
   .aceite{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--cinza-600);margin:14px 0 4px}
   .aceite input{margin:2px 0 0;width:16px;height:16px;flex:none}
 
@@ -95,7 +90,7 @@
   .btn-destaque{background:var(--amarelo-500);color:var(--azul-900)}
   .btn-destaque:not(:disabled):hover{background:#dfa000}
   .btn-pix{background:var(--verde-700);color:#fff}
-  .btn-pix:not(:disabled):hover{background:var(--verde-900)}
+  .btn-pix:not(:disabled):hover{background:#00806f}
   .btn-perigo{background:var(--vermelho-600);color:#fff}
   .btn-perigo:not(:disabled):hover{background:#8f1d17}
   .btn-fantasma{background:#fff;border-color:var(--cinza-300);color:var(--azul-700)}
@@ -104,25 +99,18 @@
   .btn-limpo:not(:disabled):hover{color:var(--azul-700);background:var(--cinza-100)}
   .btn-xs{padding:5px 10px;font-size:12.5px;gap:6px}
 
-  /* ---------- Avisos internos e toasts ---------- */
+  /* ---------- Avisos e Diálogos ---------- */
   .nota{margin:0 0 12px;font-size:13px;border-radius:var(--raio-sm);padding:0}
   .nota:empty{display:none}
-  .nota-ok{background:#eaf7f4;color:var(--verde-900);border:1px solid #b7e5db;padding:9px 11px}
   .nota-erro{background:var(--vermelho-100);color:#7d1a15;border:1px solid #f2c6c2;padding:9px 11px}
-  .nota-info{background:#fff8e6;color:var(--amarelo-900);border:1px solid #f5e0a8;padding:9px 11px}
   .avisos{position:fixed;top:12px;right:12px;z-index:60;display:flex;flex-direction:column;gap:8px;width:min(360px,calc(100vw - 24px))}
   .aviso{
     display:flex;gap:9px;align-items:flex-start;background:#fff;border:1px solid var(--cinza-300);
     border-left:4px solid var(--azul-700);border-radius:var(--raio-sm);padding:10px 12px;
     font-size:13px;box-shadow:var(--sombra);animation:entraAviso .2s ease-out
   }
-  .aviso-erro{border-left-color:var(--vermelho-600)}
-  .aviso-ok{border-left-color:var(--verde-700)}
-  .aviso-info{border-left-color:var(--amarelo-500)}
-  .aviso.sai{opacity:0;transform:translateX(8px);transition:var(--transicao)}
   @keyframes entraAviso{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
-  /* ---------- Diálogos ---------- */
   .camada{position:relative;z-index:70}
   .fundo-dialogo{
     position:fixed;inset:0;background:rgba(15,22,29,.62);display:flex;align-items:center;
@@ -143,6 +131,7 @@
   }
   .btn-icone:hover{background:var(--cinza-200);color:var(--azul-900)}
   @keyframes entraFundo{from{opacity:0}to{opacity:1}}
+
   .lista-acoes{list-style:none;margin:0;padding:0}
   .lista-acoes li+li{border-top:1px solid var(--cinza-200)}
   .item-acao{
@@ -150,31 +139,32 @@
     background:none;border:0;font:inherit;color:var(--azul-900);cursor:pointer;transition:var(--transicao)
   }
   .item-acao:hover{background:var(--cinza-50)}
+  .item-acao svg{flex:none;margin-top:2px;color:var(--azul-600)}
+  .item-acao b{display:block;font-size:13.5px;font-weight:600}
+  .item-acao span{display:block;font-size:12px;color:var(--cinza-600)}
   .item-acao.perigo{color:var(--vermelho-600)}
+  .item-acao.perigo svg{color:var(--vermelho-600)}
 
-  /* ---------- Situação da assinatura ---------- */
+  /* ---------- Assinatura e PIX ---------- */
   .situacao{display:flex;gap:10px;align-items:flex-start;border-radius:var(--raio-sm);padding:11px 12px;margin-bottom:14px;font-size:13px}
   .situacao b{display:block;font-size:13.5px;margin-bottom:2px}
   .situacao p{margin:0}
   .situacao-aviso{background:#fff8e6;color:var(--amarelo-900);border:1px solid #f5e0a8}
-  .situacao-erro{background:var(--vermelho-100);color:#7d1a15;border:1px solid #f2c6c2}
   .situacao-neutra{background:var(--cinza-100);color:var(--azul-800);border:1px solid var(--cinza-300)}
   .preco{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
   .preco b{font-size:24px;letter-spacing:-.4px}
   .preco span{font-size:12px;color:var(--cinza-600)}
 
-  /* ---------- PIX ---------- */
   .pix-rotulo{font-size:12px;color:var(--cinza-600);margin:0 0 2px;text-align:center}
   .pix-valor{font-size:28px;font-weight:700;letter-spacing:-.5px;margin:0 0 10px;text-align:center}
   .pix-qr{display:block;margin:0 auto 10px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);padding:6px;background:#fff}
   .pix-tempo{text-align:center;font-weight:600;color:var(--amarelo-900);font-size:13px;margin:0 0 12px}
-  .pix-tempo.expirou{color:var(--vermelho-600)}
   .linha-codigo{display:flex;gap:6px;margin-bottom:10px}
   .linha-codigo .campo{font-size:11.5px;padding:7px 8px;background:var(--cinza-100)}
   .linha-codigo .btn{flex:none}
   .aguardando{font-size:12.5px;color:var(--verde-900);background:#eaf7f4;border-radius:var(--raio-sm);padding:8px 10px;margin:0 0 4px;text-align:center}
 
-  /* ---------- Aplicativo (barra + calculadora) ---------- */
+  /* ---------- App Layout ---------- */
   .barra{
     display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 14px;
     background:var(--azul-800);color:#c3cdd8;font-size:12.5px;border-bottom:2px solid var(--amarelo-500)
@@ -183,24 +173,9 @@
   .barra-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:99px;border:1px solid transparent}
   .chip-ok{background:rgba(0,177,157,.18);border-color:rgba(0,177,157,.5);color:#8ff0e2}
   .chip-aviso{background:rgba(242,169,0,.16);border-color:rgba(242,169,0,.55);color:var(--amarelo-300)}
-  .chip-neutro{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.24);color:#dfe6ec}
   .barra-espaco{flex:1 1 0}
-  .faixa{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 14px;font-size:13px;border-bottom:1px solid var(--cinza-300)}
-  .faixa p{margin:0;flex:1 1 220px}
-  .faixa-aviso{background:#fff8e6;color:var(--amarelo-900)}
   .quadro{flex:1 1 auto;min-height:0;background:#fff}
   .quadro iframe{display:block;width:100%;height:100%;border:0}
-
-  @media(max-width:600px){
-    .tela{padding:16px 12px}
-    .cartao{padding:20px}
-    .campo,.btn{font-size:16px}
-    .btn-bloco{margin-top:10px}
-    .avisos{top:auto;bottom:12px;right:12px;left:12px;width:auto}
-    .barra{font-size:12px;gap:6px 10px;padding:7px 10px}
-    .barra-marca{font-size:12.5px}
-    .dialogo-acoes .btn{flex:1 1 100%}
-  }
 </style>
 </head>
 <body>
@@ -216,7 +191,7 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.4.1",
+  versao: "1.4.2",
   termosVersao: "2026-10-22",
 
   funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
@@ -226,21 +201,20 @@ const CFG = {
   isolarConteudo: true,
   analitica: true,
 
-  suporteWhatsapp: "",
-  suporteEmail: "",
+  suporteWhatsapp: "5547999998888", // Podes colocar o teu número aqui se quiseres ativar o botão
+  suporteEmail: "suporte@calculadoradecaldeiraria.com.br", // Podes colocar o teu e-mail
 
   ajuda: [
     { q: "Como uso a calculadora?", a: "Digite as medidas no formulário e use o botão de calcular. O resultado pode ser impresso ou salvo no seu computador." },
-    { q: "Como faço para assinar?", a: "Escolha cartão ou PIX na tela de assinatura. No cartão você é levado para o ambiente seguro de pagamento; no PIX, escaneie o código e a liberação é automática." },
-    { q: "Esqueci minha senha. E agora?", a: "Na tela de entrada use \"Esqueci minha senha\" e envie o link para o seu e-mail. O link abre o portal já para você definir uma senha nova." },
-    { q: "Como cancelo a assinatura?", a: "No botão Conta, escolha Cancelar assinatura. Você continua com acesso até a data já paga e não há nova cobrança." }
+    { q: "Como faço para assinar?", a: "Escolha cartão ou PIX na tela de assinatura. No cartão você é levado para o ambiente seguro; no PIX, escaneie o código e a liberação é automática." },
+    { q: "Esqueci minha senha. E agora?", a: "Na tela de entrada use \"Esqueci minha senha\" e envie o link para o seu e-mail para definir uma senha nova." },
+    { q: "Como cancelo a assinatura?", a: "No botão Conta, escolha Cancelar assinatura. Você continua com acesso até a data já paga." }
   ]
 };
 
 const SUPABASE_URL = CFG.supabaseUrl;
 const SUPABASE_ANON_KEY = CFG.supabaseAnonKey;
 const SANDBOX_CONTEUDO = CFG.isolarConteudo ? "allow-scripts allow-forms allow-modals allow-popups" : "allow-scripts allow-forms allow-modals allow-popups allow-same-origin";
-const ORIGEM_CONTEUDO = CFG.isolarConteudo ? "*" : location.origin;
 const URL_RETORNO = location.origin + location.pathname;
 
 const $ = function (id) { return document.getElementById(id); };
@@ -273,8 +247,6 @@ const ICONES = {
   cartao: '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
   pix: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M19 19h2v2h-2z"/>',
   sair: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
-  calendario: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
-  email: '<rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/>',
   cadeado: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
   atualizar: '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>'
 };
@@ -285,9 +257,7 @@ function ico(nome, tam) {
     'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + g + "</svg>";
 }
 
-const sb = (window.supabase && window.supabase.createClient)
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+const sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let acessoAtual = null;
 let modoRecuperacao = /type=recovery/.test(location.hash) || /type=recovery/.test(location.search);
@@ -296,40 +266,31 @@ let intervaloTimerPix = null, intervaloConsultaPix = null, intervaloVersao = nul
 function notificar(texto, tipo) {
   tipo = tipo || "info";
   const nota = $("nota");
-  if (nota) {
-    nota.className = "nota nota-" + tipo;
-    nota.textContent = texto;
-  }
+  if (nota) { nota.className = "nota nota-" + tipo; nota.textContent = texto; }
   const container = $("avisos");
   if (!container) return;
   const el = document.createElement("div");
-  el.className = "aviso aviso-" + tipo;
-  el.setAttribute("role", tipo === "erro" ? "alert" : "status");
-  el.innerHTML = ico(tipo === "erro" ? "alerta" : (tipo === "ok" ? "ok" : "info"), 18) + "<span>" + esc(texto) + "</span>";
+  el.className = "aviso";
+  el.innerHTML = ico("info", 18) + "<span>" + esc(texto) + "</span>";
   container.appendChild(el);
-  setTimeout(function () { el.classList.add("sai"); }, 5600);
-  setTimeout(function () { el.remove(); }, 6200);
+  setTimeout(function () { el.remove(); }, 5600);
 }
 function limparNota() { const n = $("nota"); if (n) { n.className = "nota"; n.textContent = ""; } }
 
 function textoErro(err) {
   const m = (err && (err.message || err.error_description || err.msg || err.error)) || "";
   const s = String(m).toLowerCase();
-  if (/failed to fetch|networkerror|load failed|network request failed/.test(s)) return "Sem conexão com o servidor. Verifique sua internet.";
-  if (/email not confirmed|not confirmed/.test(s)) return "Seu e-mail ainda não foi confirmado.";
-  if (/invalid login credentials|invalid credentials/.test(s)) return "E-mail ou senha incorretos.";
-  if (/rate limit|too many|security purposes/.test(s)) return "Muitas tentativas em pouco tempo. Aguarde alguns minutos.";
-  if (/already registered|already exists/.test(s)) return "Este e-mail já está cadastrado.";
-  if (/weak password|password should be/.test(s)) return "A senha não atende aos requisitos mínimos.";
-  if (/user not found/.test(s)) return "Não encontramos uma conta com este e-mail.";
-  return m || "Não foi possível concluir a operação. Tente novamente.";
+  if (/failed to fetch|networkerror/.test(s)) return "Sem conexão com o servidor. Verifique sua internet.";
+  if (/invalid login credentials/.test(s)) return "E-mail ou senha incorretos.";
+  if (/already registered/.test(s)) return "Este e-mail já está cadastrado.";
+  return m || "Não foi possível concluir a operação.";
 }
 
 function travar(botao, texto) {
   if (!botao) return;
   if (!botao.dataset.rotulo) botao.dataset.rotulo = (botao.textContent || "").trim();
   botao.disabled = true;
-  botao.innerHTML = '<span class="carregando" role="status">' + esc(texto || "Aguarde…") + "</span>";
+  botao.textContent = texto || "Aguarde…";
 }
 function liberar(botao, rotulo) {
   if (!botao) return;
@@ -339,7 +300,6 @@ function liberar(botao, rotulo) {
 function marcarInvalido(campo) {
   if (!campo) return;
   campo.classList.add("campo-invalido");
-  campo.setAttribute("aria-invalid", "true");
   if (campo.focus) campo.focus();
 }
 
@@ -367,7 +327,7 @@ function abrirDialogo(opt) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "btn " + (a.variante || "btn-primario");
-    b.innerHTML = esc(a.rotulo);
+    b.innerHTML = (a.icone ? ico(a.icone, 17) : "") + esc(a.rotulo);
     b.onclick = function () { if (a.aoClicar) a.aoClicar({ fechar: fechar, botao: b }); };
     areaAcoes.appendChild(b);
   });
@@ -385,7 +345,7 @@ function confirmar(opt) {
       titulo: opt.titulo,
       conteudo: '<p>' + (opt.texto || "") + "</p>",
       acoes: [
-        { rotulo: opt.rotuloCancelar || "Cancelar", variante: "btn-fantasma", aoClicar: function (d) { d.fechar(); } },
+        { rotulo: "Cancelar", variante: "btn-fantasma", aoClicar: function (d) { d.fechar(); } },
         { rotulo: opt.rotuloOk || "Confirmar", variante: opt.perigoso ? "btn-perigo" : "btn-primario", aoClicar: function (d) { resposta = true; d.fechar(); } }
       ],
       aoFechar: function () { resolve(resposta); }
@@ -453,7 +413,7 @@ function campoSenha(id, rotulo, autocomplete) {
     '<button type="button" class="btn-olho" data-alvo="' + id + '" aria-label="Mostrar senha">' + ico("olho", 20) + "</button></div></div>";
 }
 
-/* ---------- TELA LOGIN ---------- */
+/* ---------- LOGIN ---------- */
 function telaLogin(mensagemInicial) {
   limparTimers();
   mostrarCartao(
@@ -501,7 +461,7 @@ function telaLogin(mensagemInicial) {
 function telaEsqueceuSenha() {
   mostrarCartao(
     '<div class="marca">' + ico("email", 22) + "<h1>Recuperar senha</h1></div>" +
-    '<p class="sub">Enviaremos um link de acesso para o seu e-mail.</p>' +
+    '<p class="sub">Enviaremos um link de recuperação para o seu e-mail.</p>' +
     '<div id="nota" class="nota"></div>' +
     '<form id="form-rec" novalidate>' +
       '<div class="grupo"><label class="rotulo" for="email-rec">E-mail cadastrado</label>' +
@@ -535,7 +495,7 @@ function telaEsqueceuSenha() {
   };
 }
 
-/* ---------- NOVA SENHA (CORRIGIDA) ---------- */
+/* ---------- NOVA SENHA ---------- */
 function telaNovaSenha() {
   mostrarCartao(
     '<div class="marca">' + ico("cadeado", 22) + "<h1>Nova senha</h1></div>" +
@@ -573,7 +533,7 @@ function telaNovaSenha() {
   };
 }
 
-/* ---------- CADASTRO DE CONTA ---------- */
+/* ---------- CADASTRO ---------- */
 function telaCadastro() {
   mostrarCartao(
     '<div class="marca">' + ico("escudo", 22) + "<h1>Criar conta nova</h1></div>" +
@@ -631,7 +591,7 @@ function telaCadastro() {
   };
 }
 
-/* ---------- TELA ASSINATURA ---------- */
+/* ---------- ASSINATURA ---------- */
 function telaAssinar(dadosAcesso, precoAtual) {
   const preco = precoAtual || 49.90;
   const rotCartao = "Assinar com Cartão · " + brl(preco) + "/mês";
@@ -719,7 +679,7 @@ function abrirModalPix(dadosPix) {
       await navigator.clipboard.writeText(codigo);
       btnCopia.textContent = "Copiado!";
       setTimeout(function () { btnCopia.textContent = "Copiar"; }, 2000);
-    } catch (e) { notificar("Selecione e copie o código manualmente.", "info"); }
+    } catch (e) { notificar("Selecione e copie manualmente.", "info"); }
   };
 
   limparTimers();
@@ -747,6 +707,7 @@ function abrirModalPix(dadosPix) {
   }, 5000);
 }
 
+/* ---------- MENU DA CONTA (COM TODAS AS OPÇÕES) ---------- */
 async function abrirMenuConta() {
   const sessao = await obterSessao();
   const email = sessao ? sessao.user.email : "Visitante";
@@ -754,10 +715,14 @@ async function abrirMenuConta() {
 
   const html =
     '<div class="situacao situacao-neutra" style="margin-bottom:12px">' + ico("usuario", 20) +
-    '<div><b>' + esc(email) + '</b><p>Status: ' + (dadosAcc.ativo ? 'Assinatura ativa' : 'Sem assinatura ativa') + '</p></div></div>' +
+    '<div><b>' + esc(email) + '</b><p>Status: ' + (dadosAcc.ativo ? '<b>Assinatura ativa</b> (expira em ' + fmtData(dadosAcc.valid_until) + ')' : 'Sem assinatura ativa') + '</p></div></div>' +
     '<ul class="lista-acoes">' +
-      '<li><button type="button" class="item-acao perigo" id="acao-excluir"><b>Excluir minha conta permanentemente</b></button></li>' +
-      '<li><button type="button" class="item-acao" id="acao-sair"><b>Sair da conta</b></button></li>' +
+      '<li><button type="button" class="item-acao" id="acao-senha">' + ico("cadeado", 20) + '<div><b>Alterar senha</b><span>Definir uma senha nova para a conta</span></div></button></li>' +
+      (dadosAcc.ativo ? '<li><button type="button" class="item-acao" id="acao-cancelar">' + ico("alerta", 20) + '<div><b>Cancelar assinatura</b><span>Interrompe renovações futuras</span></div></button></li>' : '') +
+      '<li><button type="button" class="item-acao" id="acao-ajuda">' + ico("ajuda", 20) + '<div><b>Ajuda e dúvidas frequentes</b><span>Respostas rápidas sobre o portal</span></div></button></li>' +
+      (CFG.suporteWhatsapp || CFG.suporteEmail ? '<li><button type="button" class="item-acao" id="acao-suporte">' + ico("suporte", 20) + '<div><b>Falar com o suporte</b><span>Atendimento por WhatsApp ou e-mail</span></div></button></li>' : '') +
+      '<li><button type="button" class="item-acao perigo" id="acao-excluir">' + ico("lixeira", 20) + '<div><b>Excluir conta permanentemente</b><span>Apaga todos os dados e o acesso</span></div></button></li>' +
+      '<li><button type="button" class="item-acao" id="acao-sair">' + ico("sair", 20) + '<div><b>Sair da conta</b><span>Encerra a sessão neste dispositivo</span></div></button></li>' +
     '</ul>';
 
   const d = abrirDialogo({
@@ -767,19 +732,87 @@ async function abrirMenuConta() {
   });
 
   const caixa = d.caixa, fecharDlg = d.fechar;
-  caixa.querySelector("#acao-excluir").onclick = function () { fecharDlg(); fluxoExcluirConta(); };
-  caixa.querySelector("#acao-sair").onclick = async function () {
+
+  const btnSenha = caixa.querySelector("#acao-senha");
+  if (btnSenha) btnSenha.onclick = function () { fecharDlg(); fluxoAlterarSenha(); };
+
+  const btnCanc = caixa.querySelector("#acao-cancelar");
+  if (btnCanc) btnCanc.onclick = function () { fecharDlg(); fluxoCancelarAssinatura(); };
+
+  const btnAjuda = caixa.querySelector("#acao-ajuda");
+  if (btnAjuda) btnAjuda.onclick = function () { fecharDlg(); abrirAjuda(); };
+
+  const btnSup = caixa.querySelector("#acao-suporte");
+  if (btnSup) btnSup.onclick = function () { fecharDlg(); abrirSuporte(); };
+
+  const btnExc = caixa.querySelector("#acao-excluir");
+  if (btnExc) btnExc.onclick = function () { fecharDlg(); fluxoExcluirConta(); };
+
+  const btnSair = caixa.querySelector("#acao-sair");
+  if (btnSair) btnSair.onclick = async function () {
     fecharDlg();
     await sb.auth.signOut();
     telaLogin();
   };
 }
 
+async function fluxoAlterarSenha() {
+  abrirDialogo({
+    titulo: "Alterar Senha",
+    conteudo:
+      '<div id="nota-dlg" class="nota"></div>' +
+      '<form id="form-alt" novalidate>' +
+        campoSenha("alt-s1", "Nova senha (mín. 8 caracteres)", "new-password") +
+        '<div style="margin-top:12px">' + campoSenha("alt-s2", "Confirme a nova senha", "new-password") + '</div>' +
+      '</form>',
+    acoes: [
+      { rotulo: "Cancelar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } },
+      { rotulo: "Salvar nova senha", variante: "btn-primario", aoClicar: async function (dlg) {
+          const s1 = $("alt-s1").value, s2 = $("alt-s2").value;
+          const nota = dlg.caixa.querySelector("#nota-dlg");
+          if (s1.length < 8) { nota.className = "nota nota-erro"; nota.textContent = "A senha precisa ter pelo menos 8 caracteres."; return; }
+          if (s1 !== s2) { nota.className = "nota nota-erro"; nota.textContent = "As senhas não coincidem."; return; }
+          try {
+            const { error } = await sb.auth.updateUser({ password: s1 });
+            if (error) throw error;
+            dlg.fechar();
+            notificar("Senha alterada com sucesso!", "ok");
+          } catch (err) {
+            nota.className = "nota nota-erro";
+            nota.textContent = textoErro(err);
+          }
+        }
+      }
+    ]
+  });
+  ligarOlhos();
+}
+
+async function fluxoCancelarAssinatura() {
+  const ok = await confirmar({
+    titulo: "Cancelar assinatura?",
+    texto: "Sua assinatura não será renovada no próximo ciclo. Você continuará com acesso até o fim do período já pago.",
+    rotuloOk: "Sim, cancelar",
+    perigoso: true
+  });
+  if (!ok) return;
+
+  try {
+    let resp = await sb.functions.invoke(CFG.funcoesNovas.gerenciar, { body: { acao: "cancelar" } }).catch(() => null);
+    if (!resp || resp.error) {
+      resp = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "cancelar" } });
+    }
+    if (resp.error) throw resp.error;
+    notificar("Assinatura cancelada. O acesso permanece ativo até o fim do período.", "ok");
+    carregarPortal();
+  } catch (err) { notificar(textoErro(err), "erro"); }
+}
+
 async function fluxoExcluirConta() {
   const ok = await confirmar({
     titulo: "Excluir conta permanentemente?",
-    texto: "ATENÇÃO: esta operação apaga todos os seus dados. Um e-mail de confirmação será enviado.",
-    rotuloOk: "Sim, excluir conta",
+    texto: "ATENÇÃO: esta operação apaga todos os seus dados deste portal de forma irreversível.",
+    rotuloOk: "Sim, excluir minha conta",
     perigoso: true
   });
   if (!ok) return;
@@ -788,9 +821,40 @@ async function fluxoExcluirConta() {
     const { data, error } = await sb.functions.invoke(CFG.funcoes.conta);
     if (error || (data && data.error)) throw (error || new Error(data.error));
     await sb.auth.signOut();
-    mostrarCartao('<div class="marca">' + ico("ok", 22) + "<h1>Conta excluída</h1></div><p class=\"sub\">Sua conta foi excluída com sucesso.</p><button type=\"button\" class=\"btn btn-primario btn-bloco\" id=\"ok\">Início</button>");
+    mostrarCartao('<div class="marca">' + ico("ok", 22) + "<h1>Conta excluída</h1></div><p class=\"sub\">Sua conta foi excluída com sucesso.</p><button type=\"button\" class=\"btn btn-primario btn-bloco\" id=\"ok\">Voltar ao início</button>");
     $("ok").onclick = function () { telaLogin(); };
   } catch (err) { notificar(textoErro(err), "erro"); }
+}
+
+function abrirAjuda() {
+  let html = '<ul class="lista-acoes">';
+  CFG.ajuda.forEach(function (item) {
+    html += '<li style="padding:10px 0;border-bottom:1px solid var(--cinza-200)">' +
+      '<b style="font-size:13.5px;color:var(--azul-900);margin-bottom:2px">' + esc(item.q) + '</b>' +
+      '<span style="font-size:13px;color:var(--cinza-600);display:block">' + esc(item.a) + "</span></li>";
+  });
+  html += "</ul>";
+  abrirDialogo({
+    titulo: "Ajuda e Dúvidas",
+    conteudo: html,
+    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
+  });
+}
+
+function abrirSuporte() {
+  let html = '<p>Escolha uma forma de contato com o suporte:</p><div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">';
+  if (CFG.suporteWhatsapp) {
+    html += '<a class="btn btn-primario" href="https://wa.me/' + CFG.suporteWhatsapp + '" target="_blank" rel="noopener">Falar pelo WhatsApp</a>';
+  }
+  if (CFG.suporteEmail) {
+    html += '<a class="btn btn-fantasma" href="mailto:' + CFG.suporteEmail + '">Enviar e-mail para ' + esc(CFG.suporteEmail) + "</a>";
+  }
+  html += "</div>";
+  abrirDialogo({
+    titulo: "Suporte Técnico",
+    conteudo: html,
+    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
+  });
 }
 
 async function verificarAcessoServidor() {
@@ -808,33 +872,23 @@ async function verificarAcessoServidor() {
   } catch (err) { return { ativo: false, preco: 49.90, valid_until: null, motivo: "erro" }; }
 }
 
-/* ---------- CARREGAMENTO DO PORTAL (CORRIGIDO) ---------- */
 async function carregarPortal() {
   limparTimers();
 
-  // 1. Detecta parâmetros de recuperação de senha do Supabase na URL
-  const hash = location.hash || "";
-  const query = location.search || "";
+  const hash = location.hash || "", query = location.search || "";
   if (hash.includes("type=recovery") || query.includes("type=recovery") || modoRecuperacao) {
     modoRecuperacao = true;
     telaNovaSenha();
     return;
   }
 
-  // 2. Fluxo normal de login/sessão
   const sessao = await obterSessao();
-  if (!sessao) {
-    telaLogin();
-    return;
-  }
+  if (!sessao) { telaLogin(); return; }
 
   const acc = await verificarAcessoServidor();
   acessoAtual = acc;
 
-  if (!acc.ativo) {
-    telaAssinar(acc, acc.preco);
-    return;
-  }
+  if (!acc.ativo) { telaAssinar(acc, acc.preco); return; }
 
   await montarAplicativo(acc);
 }
@@ -873,11 +927,11 @@ async function montarAplicativo(acc) {
 
 window.addEventListener("DOMContentLoaded", function () {
   if (!sb) {
-    mostrarCartao('<div class="marca">' + ico("alerta", 22) + "<h1>Erro de inicialização</h1></div><p class=\"sub\">Erro ao carregar o Supabase.</p>");
+    mostrarCartao('<div class="marca">' + ico("alerta", 22) + "<h1>Erro</h1></div><p class=\"sub\">Erro ao carregar o Supabase.</p>");
     return;
   }
 
-  sb.auth.onAuthStateChange(function (evento, sessao) {
+  sb.auth.onAuthStateChange(function (evento) {
     if (evento === "PASSWORD_RECOVERY") {
       modoRecuperacao = true;
       telaNovaSenha();
