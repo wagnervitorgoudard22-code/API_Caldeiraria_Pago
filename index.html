@@ -10,13 +10,11 @@
 <style>
   *,*::before,*::after{box-sizing:border-box}
   :root{
-    /* Marca */
     --azul-900:#16212c; --azul-800:#1c2630; --azul-700:#27384a; --azul-600:#3d5066;
     --cinza-50:#f7f8fa; --cinza-100:#f1f3f5; --cinza-200:#e6e9ec; --cinza-300:#cfd6dc; --cinza-600:#5d6b78;
     --amarelo-500:#f2a900; --amarelo-300:#ffd675; --amarelo-900:#5a3f00;
     --verde-500:#00b19d; --verde-700:#00806f; --verde-900:#0b5c51;
     --vermelho-600:#b3261e; --vermelho-100:#fdeceb;
-    /* Sistema */
     --fonte:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --raio:8px; --raio-sm:4px;
     --sombra:0 10px 30px -12px rgba(22,33,44,.35);
@@ -37,7 +35,6 @@
   a{color:var(--azul-700)}
   :focus-visible{outline:2px solid var(--azul-700);outline-offset:2px}
 
-  /* ---------- Estrutura ---------- */
   .tela{width:100%;padding:24px 16px;display:grid;place-items:center}
   .tela-app{padding:0;display:flex;flex-direction:column;height:100vh;place-items:stretch}
   .cartao{
@@ -54,7 +51,6 @@
   .carregando{font-size:13.5px;color:var(--cinza-600);margin:0}
   .sem-js{padding:24px;background:#fff;border:1px solid var(--cinza-300);border-radius:var(--raio);max-width:420px}
 
-  /* ---------- Formulários ---------- */
   .rotulo{display:block;font-size:12.5px;font-weight:600;color:var(--cinza-600);margin:0 0 5px}
   .campo{
     width:100%;padding:10px 11px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);
@@ -75,7 +71,6 @@
   .aceite{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--cinza-600);margin:14px 0 4px}
   .aceite input{margin:2px 0 0;width:16px;height:16px;flex:none}
 
-  /* ---------- Botões ---------- */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
     padding:11px 14px;border:1px solid transparent;border-radius:var(--raio-sm);
@@ -99,7 +94,6 @@
   .btn-limpo:not(:disabled):hover{color:var(--azul-700);background:var(--cinza-100)}
   .btn-xs{padding:5px 10px;font-size:12.5px;gap:6px}
 
-  /* ---------- Avisos e Diálogos ---------- */
   .nota{margin:0 0 12px;font-size:13px;border-radius:var(--raio-sm);padding:0}
   .nota:empty{display:none}
   .nota-erro{background:var(--vermelho-100);color:#7d1a15;border:1px solid #f2c6c2;padding:9px 11px}
@@ -145,7 +139,6 @@
   .item-acao.perigo{color:var(--vermelho-600)}
   .item-acao.perigo svg{color:var(--vermelho-600)}
 
-  /* ---------- Assinatura e PIX ---------- */
   .situacao{display:flex;gap:10px;align-items:flex-start;border-radius:var(--raio-sm);padding:11px 12px;margin-bottom:14px;font-size:13px}
   .situacao b{display:block;font-size:13.5px;margin-bottom:2px}
   .situacao p{margin:0}
@@ -164,7 +157,6 @@
   .linha-codigo .btn{flex:none}
   .aguardando{font-size:12.5px;color:var(--verde-900);background:#eaf7f4;border-radius:var(--raio-sm);padding:8px 10px;margin:0 0 4px;text-align:center}
 
-  /* ---------- App Layout ---------- */
   .barra{
     display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 14px;
     background:var(--azul-800);color:#c3cdd8;font-size:12.5px;border-bottom:2px solid var(--amarelo-500)
@@ -191,17 +183,16 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.4.4",
+  versao: "1.4.6",
   termosVersao: "2026-10-22",
 
   funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
   funcoesNovas: { acesso: "acesso-app", gerenciar: "gerenciar-assinatura" },
 
   expiracaoPixSegundos: 300,
-  isolarConteudo: true,
+  isolarConteudo: false,
   analitica: true,
 
-  // Seus dados de suporte configurados:
   suporteWhatsapp: "5547992399616",
   suporteEmail: "goudardimports@gmail.com",
 
@@ -215,7 +206,12 @@ const CFG = {
 
 const SUPABASE_URL = CFG.supabaseUrl;
 const SUPABASE_ANON_KEY = CFG.supabaseAnonKey;
-const SANDBOX_CONTEUDO = CFG.isolarConteudo ? "allow-scripts allow-forms allow-modals allow-popups" : "allow-scripts allow-forms allow-modals allow-popups allow-same-origin";
+
+/* Sandbox atualizado com allow-downloads para permitir gerar/baixar o PDF */
+const SANDBOX_CONTEUDO = CFG.isolarConteudo 
+  ? "allow-scripts allow-forms allow-modals allow-popups allow-downloads" 
+  : "allow-scripts allow-forms allow-modals allow-popups allow-same-origin allow-downloads";
+
 const URL_RETORNO = location.origin + location.pathname;
 
 const $ = function (id) { return document.getElementById(id); };
@@ -734,23 +730,14 @@ async function abrirMenuConta() {
 
   const caixa = d.caixa, fecharDlg = d.fechar;
 
-  const btnSenha = caixa.querySelector("#acao-senha");
-  if (btnSenha) btnSenha.onclick = function () { fecharDlg(); fluxoAlterarSenha(); };
-
+  caixa.querySelector("#acao-senha").onclick = function () { fecharDlg(); fluxoAlterarSenha(); };
   const btnCanc = caixa.querySelector("#acao-cancelar");
   if (btnCanc) btnCanc.onclick = function () { fecharDlg(); fluxoCancelarAssinatura(); };
-
-  const btnAjuda = caixa.querySelector("#acao-ajuda");
-  if (btnAjuda) btnAjuda.onclick = function () { fecharDlg(); abrirAjuda(); };
-
+  caixa.querySelector("#acao-ajuda").onclick = function () { fecharDlg(); abrirAjuda(); };
   const btnSup = caixa.querySelector("#acao-suporte");
   if (btnSup) btnSup.onclick = function () { fecharDlg(); abrirSuporte(); };
-
-  const btnExc = caixa.querySelector("#acao-excluir");
-  if (btnExc) btnExc.onclick = function () { fecharDlg(); fluxoExcluirConta(); };
-
-  const btnSair = caixa.querySelector("#acao-sair");
-  if (btnSair) btnSair.onclick = async function () {
+  caixa.querySelector("#acao-excluir").onclick = function () { fecharDlg(); fluxoExcluirConta(); };
+  caixa.querySelector("#acao-sair").onclick = async function () {
     fecharDlg();
     await sb.auth.signOut();
     telaLogin();
