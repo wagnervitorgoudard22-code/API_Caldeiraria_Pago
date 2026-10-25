@@ -191,7 +191,7 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.4.2",
+  versao: "1.4.4",
   termosVersao: "2026-10-22",
 
   funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
@@ -201,8 +201,9 @@ const CFG = {
   isolarConteudo: true,
   analitica: true,
 
-  suporteWhatsapp: "5547999998888", // Podes colocar o teu número aqui se quiseres ativar o botão
-  suporteEmail: "suporte@calculadoradecaldeiraria.com.br", // Podes colocar o teu e-mail
+  // Seus dados de suporte configurados:
+  suporteWhatsapp: "5547992399616",
+  suporteEmail: "goudardimports@gmail.com",
 
   ajuda: [
     { q: "Como uso a calculadora?", a: "Digite as medidas no formulário e use o botão de calcular. O resultado pode ser impresso ou salvo no seu computador." },
@@ -707,7 +708,7 @@ function abrirModalPix(dadosPix) {
   }, 5000);
 }
 
-/* ---------- MENU DA CONTA (COM TODAS AS OPÇÕES) ---------- */
+/* ---------- MENU DA CONTA ---------- */
 async function abrirMenuConta() {
   const sessao = await obterSessao();
   const email = sessao ? sessao.user.email : "Visitante";
@@ -844,7 +845,7 @@ function abrirAjuda() {
 function abrirSuporte() {
   let html = '<p>Escolha uma forma de contato com o suporte:</p><div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">';
   if (CFG.suporteWhatsapp) {
-    html += '<a class="btn btn-primario" href="https://wa.me/' + CFG.suporteWhatsapp + '" target="_blank" rel="noopener">Falar pelo WhatsApp</a>';
+    html += '<a class="btn btn-pix" href="https://wa.me/' + CFG.suporteWhatsapp + '" target="_blank" rel="noopener">Falar pelo WhatsApp</a>';
   }
   if (CFG.suporteEmail) {
     html += '<a class="btn btn-fantasma" href="mailto:' + CFG.suporteEmail + '">Enviar e-mail para ' + esc(CFG.suporteEmail) + "</a>";
