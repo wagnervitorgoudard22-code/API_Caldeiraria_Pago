@@ -183,11 +183,11 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.4.6",
+  versao: "1.4.7",
   termosVersao: "2026-10-22",
 
   funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
-  funcoesNovas: { acesso: "acesso-app", gerenciar: "gerenciar-assinatura" },
+  funcoesNovas: { acesso: "acesso-app", gerenciar: "gerenciar-assinatura", preco: "preco-assinatura" },
 
   expiracaoPixSegundos: 300,
   isolarConteudo: false,
@@ -325,7 +325,7 @@ function abrirDialogo(opt) {
     b.type = "button";
     b.className = "btn " + (a.variante || "btn-primario");
     b.innerHTML = (a.icone ? ico(a.icone, 17) : "") + esc(a.rotulo);
-    b.onclick = function () { if (a.aoClicar) a.aoClicar({ fechar: fechar, botao: b }); };
+    b.onclick = function () { if (a.aoClicar) a.aoClicar({ fechar: fechar, botao: b, caixa: caixa }); };
     areaAcoes.appendChild(b);
   });
   if (!(opt.acoes || []).length) areaAcoes.remove();
@@ -845,19 +845,30 @@ function abrirSuporte() {
   });
 }
 
+/* Busca o preço atual no servidor (função "preco-assinatura", que lê o secret) */
+async function obterPreco() {
+  try {
+    const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.preco);
+    if (!error && data && Number(data.preco) > 0) return Number(data.preco);
+  } catch (e) {}
+  return 49.90;
+}
+
 async function verificarAcessoServidor() {
+  const preco = await obterPreco();
+
   try {
     const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.acesso);
-    if (!error && data) return { ativo: Boolean(data.ativo), preco: Number(data.preco || 49.90), valid_until: data.valid_until || null, motivo: data.motivo };
+    if (!error && data) return { ativo: Boolean(data.ativo), preco: Number(data.preco || preco), valid_until: data.valid_until || null, motivo: data.motivo };
   } catch (e) {}
 
   try {
     const { data: ass, error } = await sb.from("assinaturas").select("status,valid_until,ativado_em").maybeSingle();
-    if (error || !ass || !ass.valid_until) return { ativo: false, preco: 49.90, valid_until: null, motivo: "sem_assinatura" };
+    if (error || !ass || !ass.valid_until) return { ativo: false, preco: preco, valid_until: null, motivo: "sem_assinatura" };
     const exp = new Date(ass.valid_until);
     const ativo = exp.getTime() > Date.now();
-    return { ativo: ativo, preco: 49.90, valid_until: ass.valid_until, motivo: ativo ? "ativo" : "expirado" };
-  } catch (err) { return { ativo: false, preco: 49.90, valid_until: null, motivo: "erro" }; }
+    return { ativo: ativo, preco: preco, valid_until: ass.valid_until, motivo: ativo ? "ativo" : "expirado" };
+  } catch (err) { return { ativo: false, preco: preco, valid_until: null, motivo: "erro" }; }
 }
 
 async function carregarPortal() {
