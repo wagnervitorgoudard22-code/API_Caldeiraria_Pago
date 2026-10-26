@@ -183,7 +183,7 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.4.7",
+  versao: "1.4.8",
   termosVersao: "2026-10-22",
 
   funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
@@ -588,9 +588,21 @@ function telaCadastro() {
   };
 }
 
+/* ---------- FUNÇÃO PARA OBTER O PREÇO DO SERVIDOR ---------- */
+async function obterPrecoServidor() {
+  try {
+    const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.preco);
+    if (!error && data && data.preco) {
+      return Number(data.preco);
+    }
+  } catch (e) {}
+  return 49.90; // Valor padrão de fallback se falhar
+}
+
 /* ---------- ASSINATURA ---------- */
-function telaAssinar(dadosAcesso, precoAtual) {
-  const preco = precoAtual || 49.90;
+async function telaAssinar(dadosAcesso, precoAtual) {
+  // Puxa o preço dinâmico do servidor caso não venha passado por parâmetro
+  const preco = Number(precoAtual || (dadosAcesso && dadosAcesso.preco) || await obterPrecoServidor());
   const rotCartao = "Assinar com Cartão · " + brl(preco) + "/mês";
   const rotPix = "Pagar com PIX · " + brl(preco);
 
@@ -631,7 +643,7 @@ function telaAssinar(dadosAcesso, precoAtual) {
     try {
       const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: "pix" } });
       if (error) throw error;
-      abrirModalPix(data);
+      abrirModalPix(data, preco);
     } catch (err) {
       liberar(btn, rotPix);
       notificar(textoErro(err), "erro");
@@ -648,10 +660,10 @@ function telaAssinar(dadosAcesso, precoAtual) {
   $("btn-conta").onclick = function () { abrirMenuConta(); };
 }
 
-function abrirModalPix(dadosPix) {
+function abrirModalPix(dadosPix, precoAtual) {
   const codigo = dadosPix.qr_code;
   const base64 = dadosPix.qr_code_base64;
-  const valor = Number(dadosPix.valor || 49.90);
+  const valor = Number(dadosPix.valor || precoAtual || 49.90);
   let segundosRestantes = Number(dadosPix.expiracao_segundos || CFG.expiracaoPixSegundos);
 
   const d = abrirDialogo({
@@ -845,30 +857,19 @@ function abrirSuporte() {
   });
 }
 
-/* Busca o preço atual no servidor (função "preco-assinatura", que lê o secret) */
-async function obterPreco() {
-  try {
-    const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.preco);
-    if (!error && data && Number(data.preco) > 0) return Number(data.preco);
-  } catch (e) {}
-  return 49.90;
-}
-
 async function verificarAcessoServidor() {
-  const preco = await obterPreco();
-
   try {
     const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.acesso);
-    if (!error && data) return { ativo: Boolean(data.ativo), preco: Number(data.preco || preco), valid_until: data.valid_until || null, motivo: data.motivo };
+    if (!error && data) return { ativo: Boolean(data.ativo), preco: Number(data.preco || 49.90), valid_until: data.valid_until || null, motivo: data.motivo };
   } catch (e) {}
 
   try {
     const { data: ass, error } = await sb.from("assinaturas").select("status,valid_until,ativado_em").maybeSingle();
-    if (error || !ass || !ass.valid_until) return { ativo: false, preco: preco, valid_until: null, motivo: "sem_assinatura" };
+    if (error || !ass || !ass.valid_until) return { ativo: false, preco: 49.90, valid_until: null, motivo: "sem_assinatura" };
     const exp = new Date(ass.valid_until);
     const ativo = exp.getTime() > Date.now();
-    return { ativo: ativo, preco: preco, valid_until: ass.valid_until, motivo: ativo ? "ativo" : "expirado" };
-  } catch (err) { return { ativo: false, preco: preco, valid_until: null, motivo: "erro" }; }
+    return { ativo: ativo, preco: 49.90, valid_until: ass.valid_until, motivo: ativo ? "ativo" : "expirado" };
+  } catch (err) { return { ativo: false, preco: 49.90, valid_until: null, motivo: "erro" }; }
 }
 
 async function carregarPortal() {
