@@ -183,11 +183,11 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.4.8",
+  versao: "1.5.0",
   termosVersao: "2026-10-22",
 
   funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
-  funcoesNovas: { acesso: "acesso-app", gerenciar: "gerenciar-assinatura", preco: "preco-assinatura" },
+  funcoesNovas: { acesso: "acesso-app", gerenciar: "gerenciar-assinatura" },
 
   expiracaoPixSegundos: 300,
   isolarConteudo: false,
@@ -588,21 +588,24 @@ function telaCadastro() {
   };
 }
 
-/* ---------- FUNÇÃO PARA OBTER O PREÇO DO SERVIDOR ---------- */
-async function obterPrecoServidor() {
+/* ---------- CONSULTAR O PREÇO DO SECRET DIRETO NA EDGE FUNCTION ---------- */
+async function obterPrecoDoSecret() {
   try {
-    const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.preco);
-    if (!error && data && data.preco) {
-      return Number(data.preco);
-    }
+    const { data } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "obter_preco" } });
+    if (data && data.preco) return Number(data.preco);
   } catch (e) {}
-  return 49.90; // Valor padrão de fallback se falhar
+  return null;
 }
 
 /* ---------- ASSINATURA ---------- */
 async function telaAssinar(dadosAcesso, precoAtual) {
-  // Puxa o preço dinâmico do servidor caso não venha passado por parâmetro
-  const preco = Number(precoAtual || (dadosAcesso && dadosAcesso.preco) || await obterPrecoServidor());
+  // Puxa o preço do Secret através da Edge Function criar-assinatura que você possui
+  let preco = Number(precoAtual || (dadosAcesso && dadosAcesso.preco) || 0);
+  if (!preco) {
+    const pSecret = await obterPrecoDoSecret();
+    preco = pSecret || 49.90;
+  }
+
   const rotCartao = "Assinar com Cartão · " + brl(preco) + "/mês";
   const rotPix = "Pagar com PIX · " + brl(preco);
 
@@ -728,218 +731,4 @@ async function abrirMenuConta() {
     '<ul class="lista-acoes">' +
       '<li><button type="button" class="item-acao" id="acao-senha">' + ico("cadeado", 20) + '<div><b>Alterar senha</b><span>Definir uma senha nova para a conta</span></div></button></li>' +
       (dadosAcc.ativo ? '<li><button type="button" class="item-acao" id="acao-cancelar">' + ico("alerta", 20) + '<div><b>Cancelar assinatura</b><span>Interrompe renovações futuras</span></div></button></li>' : '') +
-      '<li><button type="button" class="item-acao" id="acao-ajuda">' + ico("ajuda", 20) + '<div><b>Ajuda e dúvidas frequentes</b><span>Respostas rápidas sobre o portal</span></div></button></li>' +
-      (CFG.suporteWhatsapp || CFG.suporteEmail ? '<li><button type="button" class="item-acao" id="acao-suporte">' + ico("suporte", 20) + '<div><b>Falar com o suporte</b><span>Atendimento por WhatsApp ou e-mail</span></div></button></li>' : '') +
-      '<li><button type="button" class="item-acao perigo" id="acao-excluir">' + ico("lixeira", 20) + '<div><b>Excluir conta permanentemente</b><span>Apaga todos os dados e o acesso</span></div></button></li>' +
-      '<li><button type="button" class="item-acao" id="acao-sair">' + ico("sair", 20) + '<div><b>Sair da conta</b><span>Encerra a sessão neste dispositivo</span></div></button></li>' +
-    '</ul>';
-
-  const d = abrirDialogo({
-    titulo: "Minha Conta",
-    conteudo: html,
-    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
-  });
-
-  const caixa = d.caixa, fecharDlg = d.fechar;
-
-  caixa.querySelector("#acao-senha").onclick = function () { fecharDlg(); fluxoAlterarSenha(); };
-  const btnCanc = caixa.querySelector("#acao-cancelar");
-  if (btnCanc) btnCanc.onclick = function () { fecharDlg(); fluxoCancelarAssinatura(); };
-  caixa.querySelector("#acao-ajuda").onclick = function () { fecharDlg(); abrirAjuda(); };
-  const btnSup = caixa.querySelector("#acao-suporte");
-  if (btnSup) btnSup.onclick = function () { fecharDlg(); abrirSuporte(); };
-  caixa.querySelector("#acao-excluir").onclick = function () { fecharDlg(); fluxoExcluirConta(); };
-  caixa.querySelector("#acao-sair").onclick = async function () {
-    fecharDlg();
-    await sb.auth.signOut();
-    telaLogin();
-  };
-}
-
-async function fluxoAlterarSenha() {
-  abrirDialogo({
-    titulo: "Alterar Senha",
-    conteudo:
-      '<div id="nota-dlg" class="nota"></div>' +
-      '<form id="form-alt" novalidate>' +
-        campoSenha("alt-s1", "Nova senha (mín. 8 caracteres)", "new-password") +
-        '<div style="margin-top:12px">' + campoSenha("alt-s2", "Confirme a nova senha", "new-password") + '</div>' +
-      '</form>',
-    acoes: [
-      { rotulo: "Cancelar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } },
-      { rotulo: "Salvar nova senha", variante: "btn-primario", aoClicar: async function (dlg) {
-          const s1 = $("alt-s1").value, s2 = $("alt-s2").value;
-          const nota = dlg.caixa.querySelector("#nota-dlg");
-          if (s1.length < 8) { nota.className = "nota nota-erro"; nota.textContent = "A senha precisa ter pelo menos 8 caracteres."; return; }
-          if (s1 !== s2) { nota.className = "nota nota-erro"; nota.textContent = "As senhas não coincidem."; return; }
-          try {
-            const { error } = await sb.auth.updateUser({ password: s1 });
-            if (error) throw error;
-            dlg.fechar();
-            notificar("Senha alterada com sucesso!", "ok");
-          } catch (err) {
-            nota.className = "nota nota-erro";
-            nota.textContent = textoErro(err);
-          }
-        }
-      }
-    ]
-  });
-  ligarOlhos();
-}
-
-async function fluxoCancelarAssinatura() {
-  const ok = await confirmar({
-    titulo: "Cancelar assinatura?",
-    texto: "Sua assinatura não será renovada no próximo ciclo. Você continuará com acesso até o fim do período já pago.",
-    rotuloOk: "Sim, cancelar",
-    perigoso: true
-  });
-  if (!ok) return;
-
-  try {
-    let resp = await sb.functions.invoke(CFG.funcoesNovas.gerenciar, { body: { acao: "cancelar" } }).catch(() => null);
-    if (!resp || resp.error) {
-      resp = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "cancelar" } });
-    }
-    if (resp.error) throw resp.error;
-    notificar("Assinatura cancelada. O acesso permanece ativo até o fim do período.", "ok");
-    carregarPortal();
-  } catch (err) { notificar(textoErro(err), "erro"); }
-}
-
-async function fluxoExcluirConta() {
-  const ok = await confirmar({
-    titulo: "Excluir conta permanentemente?",
-    texto: "ATENÇÃO: esta operação apaga todos os seus dados deste portal de forma irreversível.",
-    rotuloOk: "Sim, excluir minha conta",
-    perigoso: true
-  });
-  if (!ok) return;
-
-  try {
-    const { data, error } = await sb.functions.invoke(CFG.funcoes.conta);
-    if (error || (data && data.error)) throw (error || new Error(data.error));
-    await sb.auth.signOut();
-    mostrarCartao('<div class="marca">' + ico("ok", 22) + "<h1>Conta excluída</h1></div><p class=\"sub\">Sua conta foi excluída com sucesso.</p><button type=\"button\" class=\"btn btn-primario btn-bloco\" id=\"ok\">Voltar ao início</button>");
-    $("ok").onclick = function () { telaLogin(); };
-  } catch (err) { notificar(textoErro(err), "erro"); }
-}
-
-function abrirAjuda() {
-  let html = '<ul class="lista-acoes">';
-  CFG.ajuda.forEach(function (item) {
-    html += '<li style="padding:10px 0;border-bottom:1px solid var(--cinza-200)">' +
-      '<b style="font-size:13.5px;color:var(--azul-900);margin-bottom:2px">' + esc(item.q) + '</b>' +
-      '<span style="font-size:13px;color:var(--cinza-600);display:block">' + esc(item.a) + "</span></li>";
-  });
-  html += "</ul>";
-  abrirDialogo({
-    titulo: "Ajuda e Dúvidas",
-    conteudo: html,
-    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
-  });
-}
-
-function abrirSuporte() {
-  let html = '<p>Escolha uma forma de contato com o suporte:</p><div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">';
-  if (CFG.suporteWhatsapp) {
-    html += '<a class="btn btn-pix" href="https://wa.me/' + CFG.suporteWhatsapp + '" target="_blank" rel="noopener">Falar pelo WhatsApp</a>';
-  }
-  if (CFG.suporteEmail) {
-    html += '<a class="btn btn-fantasma" href="mailto:' + CFG.suporteEmail + '">Enviar e-mail para ' + esc(CFG.suporteEmail) + "</a>";
-  }
-  html += "</div>";
-  abrirDialogo({
-    titulo: "Suporte Técnico",
-    conteudo: html,
-    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
-  });
-}
-
-async function verificarAcessoServidor() {
-  try {
-    const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.acesso);
-    if (!error && data) return { ativo: Boolean(data.ativo), preco: Number(data.preco || 49.90), valid_until: data.valid_until || null, motivo: data.motivo };
-  } catch (e) {}
-
-  try {
-    const { data: ass, error } = await sb.from("assinaturas").select("status,valid_until,ativado_em").maybeSingle();
-    if (error || !ass || !ass.valid_until) return { ativo: false, preco: 49.90, valid_until: null, motivo: "sem_assinatura" };
-    const exp = new Date(ass.valid_until);
-    const ativo = exp.getTime() > Date.now();
-    return { ativo: ativo, preco: 49.90, valid_until: ass.valid_until, motivo: ativo ? "ativo" : "expirado" };
-  } catch (err) { return { ativo: false, preco: 49.90, valid_until: null, motivo: "erro" }; }
-}
-
-async function carregarPortal() {
-  limparTimers();
-
-  const hash = location.hash || "", query = location.search || "";
-  if (hash.includes("type=recovery") || query.includes("type=recovery") || modoRecuperacao) {
-    modoRecuperacao = true;
-    telaNovaSenha();
-    return;
-  }
-
-  const sessao = await obterSessao();
-  if (!sessao) { telaLogin(); return; }
-
-  const acc = await verificarAcessoServidor();
-  acessoAtual = acc;
-
-  if (!acc.ativo) { telaAssinar(acc, acc.preco); return; }
-
-  await montarAplicativo(acc);
-}
-
-async function montarAplicativo(acc) {
-  document.body.classList.add("modo-app");
-  const tela = $("tela");
-  tela.className = "tela tela-app";
-  tela.innerHTML = '<div class="carregando" style="padding:20px" role="status">Carregando calculadora…</div>';
-
-  let htmlConteudo = "";
-  try {
-    const { data } = await sb.from("app_conteudo").select("html").eq("id", 1).maybeSingle();
-    if (data) htmlConteudo = data.html || "";
-  } catch (e) {}
-
-  const exp = new Date(acc.valid_until);
-  const dias = Math.max(0, Math.ceil((exp.getTime() - Date.now()) / 86400000));
-
-  tela.innerHTML =
-    '<header class="barra" role="banner">' +
-      '<div class="barra-marca">' + ico("escudo", 18) + '<b>Orçamento de Caldeiraria</b></div>' +
-      '<div class="barra-chip ' + (dias <= 5 ? "chip-aviso" : "chip-ok") + '"><span>Acesso até <b>' + fmtData(exp) + "</b> (" + plural(dias, "dia") + ")</span></div>" +
-      '<div class="barra-espaco"></div>' +
-      '<button type="button" class="btn btn-fantasma btn-xs" id="btn-menu-conta">' + ico("usuario", 15) + "Conta</button>" +
-    "</header>" +
-    '<section class="quadro" aria-label="Aplicativo principal">' +
-      '<iframe id="iframe-app" sandbox="' + SANDBOX_CONTEUDO + '" title="Calculadora de Caldeiraria"></iframe>' +
-    '</section>';
-
-  const iframe = $("iframe-app");
-  if (iframe) iframe.srcdoc = htmlConteudo;
-
-  $("btn-menu-conta").onclick = function () { abrirMenuConta(); };
-}
-
-window.addEventListener("DOMContentLoaded", function () {
-  if (!sb) {
-    mostrarCartao('<div class="marca">' + ico("alerta", 22) + "<h1>Erro</h1></div><p class=\"sub\">Erro ao carregar o Supabase.</p>");
-    return;
-  }
-
-  sb.auth.onAuthStateChange(function (evento) {
-    if (evento === "PASSWORD_RECOVERY") {
-      modoRecuperacao = true;
-      telaNovaSenha();
-    }
-  });
-
-  carregarPortal();
-});
-</script>
-</body>
-</html>
+      '<li><button type="button" class="item-acao" id="acao-ajuda">' + ico("ajuda", 20) + '<div><b>Ajuda e dúvidas frequentes</b><span>Respostas rápidas sobre o portal
