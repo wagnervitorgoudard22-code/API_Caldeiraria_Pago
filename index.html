@@ -18,23 +18,18 @@
     --fonte:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --raio:8px; --raio-sm:4px;
     --sombra:0 10px 30px -12px rgba(22,33,44,.35);
-    --sombra-forte:0 18px 45px -16px rgba(22,33,44,.45);
-    --foco:0 0 0 3px rgba(39,56,74,.32);
-    --transicao:all .18s cubic-bezier(.4,0,.2,1);
   }
   html,body{height:100%}
   body{
     margin:0;min-height:100vh;display:grid;place-items:center;
     background:linear-gradient(180deg,#eef1f4,#e1e6eb);
-    font:15px/1.5 var(--fonte);color:var(--azul-900);-webkit-text-size-adjust:100%;
+    font:15px/1.5 var(--fonte);color:var(--azul-900);
   }
   body.modo-app{display:block;height:100vh;overflow:hidden;background:var(--cinza-100)}
   p{margin:0 0 12px}
-  h1{margin:0;font-size:20px;letter-spacing:-.2px}
+  h1{margin:0;font-size:20px}
   h2{margin:0;font-size:16px}
   a{color:var(--azul-700)}
-  :focus-visible{outline:2px solid var(--azul-700);outline-offset:2px}
-
   .tela{width:100%;padding:24px 16px;display:grid;place-items:center}
   .tela-app{padding:0;display:flex;flex-direction:column;height:100vh;place-items:stretch}
   .cartao{
@@ -42,900 +37,169 @@
     border-top:4px solid var(--amarelo-500);border-radius:var(--raio);
     padding:26px;box-shadow:var(--sombra)
   }
-  .cartao[aria-busy="true"]{opacity:.75}
   .marca{display:flex;align-items:center;gap:10px;margin-bottom:6px;color:var(--azul-700)}
-  .marca h1{font-size:19px}
   .sub{color:var(--cinza-600);font-size:13.5px;margin:0 0 14px}
-  .rodape{margin:16px 0 0;font-size:11.5px;color:var(--cinza-600);text-align:center;line-height:1.7}
-  .rodape a{color:var(--azul-700)}
-  .carregando{font-size:13.5px;color:var(--cinza-600);margin:0}
-  .sem-js{padding:24px;background:#fff;border:1px solid var(--cinza-300);border-radius:var(--raio);max-width:420px}
-
+  .rodape{margin:16px 0 0;font-size:11.5px;color:var(--cinza-600);text-align:center}
   .rotulo{display:block;font-size:12.5px;font-weight:600;color:var(--cinza-600);margin:0 0 5px}
-  .campo{
-    width:100%;padding:10px 11px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);
-    font:inherit;background:#fff;color:var(--azul-900);transition:var(--transicao)
-  }
-  .campo:hover{border-color:#b6c0c9}
-  .campo:focus{border-color:var(--azul-700);box-shadow:var(--foco);outline:none}
-  .campo-invalido{border-color:var(--vermelho-600);background:var(--vermelho-100)}
+  .campo{width:100%;padding:10px 11px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);font:inherit;background:#fff;color:var(--azul-900)}
   .grupo{margin-bottom:12px}
-  .campo-senha{position:relative}
-  .campo-senha .campo{padding-right:44px}
-  .btn-olho{
-    position:absolute;right:6px;top:50%;transform:translateY(-50%);
-    width:32px;height:32px;display:grid;place-items:center;padding:0;
-    background:none;border:0;border-radius:var(--raio-sm);color:var(--cinza-600);cursor:pointer
-  }
-  .btn-olho:hover{background:var(--cinza-100);color:var(--azul-700)}
-  .aceite{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--cinza-600);margin:14px 0 4px}
-  .aceite input{margin:2px 0 0;width:16px;height:16px;flex:none}
-
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
     padding:11px 14px;border:1px solid transparent;border-radius:var(--raio-sm);
-    font:600 14.5px/1.2 var(--fonte);cursor:pointer;transition:var(--transicao);
-    white-space:nowrap;text-decoration:none
+    font:600 14.5px/1.2 var(--fonte);cursor:pointer;width:100%;margin-top:8px;text-decoration:none
   }
-  .btn:disabled{opacity:.62;cursor:not-allowed}
-  .btn:not(:disabled):active{transform:translateY(1px)}
-  .btn-bloco{width:100%;margin-top:8px}
   .btn-primario{background:var(--azul-700);color:#fff}
-  .btn-primario:not(:disabled):hover{background:var(--azul-900)}
   .btn-destaque{background:var(--amarelo-500);color:var(--azul-900)}
-  .btn-destaque:not(:disabled):hover{background:#dfa000}
   .btn-pix{background:var(--verde-700);color:#fff}
-  .btn-pix:not(:disabled):hover{background:#00806f}
-  .btn-perigo{background:var(--vermelho-600);color:#fff}
-  .btn-perigo:not(:disabled):hover{background:#8f1d17}
   .btn-fantasma{background:#fff;border-color:var(--cinza-300);color:var(--azul-700)}
-  .btn-fantasma:not(:disabled):hover{background:var(--cinza-50);border-color:#b6c0c9}
   .btn-limpo{background:none;color:var(--cinza-600)}
-  .btn-limpo:not(:disabled):hover{color:var(--azul-700);background:var(--cinza-100)}
-  .btn-xs{padding:5px 10px;font-size:12.5px;gap:6px}
-
   .nota{margin:0 0 12px;font-size:13px;border-radius:var(--raio-sm);padding:0}
   .nota:empty{display:none}
   .nota-erro{background:var(--vermelho-100);color:#7d1a15;border:1px solid #f2c6c2;padding:9px 11px}
-  .avisos{position:fixed;top:12px;right:12px;z-index:60;display:flex;flex-direction:column;gap:8px;width:min(360px,calc(100vw - 24px))}
-  .aviso{
-    display:flex;gap:9px;align-items:flex-start;background:#fff;border:1px solid var(--cinza-300);
-    border-left:4px solid var(--azul-700);border-radius:var(--raio-sm);padding:10px 12px;
-    font-size:13px;box-shadow:var(--sombra);animation:entraAviso .2s ease-out
-  }
-  @keyframes entraAviso{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-
-  .camada{position:relative;z-index:70}
-  .fundo-dialogo{
-    position:fixed;inset:0;background:rgba(15,22,29,.62);display:flex;align-items:center;
-    justify-content:center;padding:16px;overflow:auto;animation:entraFundo .15s ease-out
-  }
-  .dialogo{
-    background:#fff;border-radius:var(--raio);width:min(460px,100%);max-height:92vh;overflow:auto;
-    box-shadow:var(--sombra-forte);border-top:4px solid var(--amarelo-500)
-  }
-  .dialogo-topo{display:flex;align-items:flex-start;gap:12px;padding:16px 16px 8px}
-  .dialogo-topo h2{flex:1;padding-top:3px}
-  .dialogo-corpo{padding:4px 16px 0;font-size:13.5px}
-  .dialogo-acoes{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px 16px}
-  .dialogo-acoes .btn{flex:1 1 auto;margin-top:0}
-  .btn-icone{
-    width:32px;height:32px;flex:none;display:grid;place-items:center;padding:0;border:0;
-    background:var(--cinza-100);border-radius:var(--raio-sm);color:var(--cinza-600);cursor:pointer;transition:var(--transicao)
-  }
-  .btn-icone:hover{background:var(--cinza-200);color:var(--azul-900)}
-  @keyframes entraFundo{from{opacity:0}to{opacity:1}}
-
-  .lista-acoes{list-style:none;margin:0;padding:0}
-  .lista-acoes li+li{border-top:1px solid var(--cinza-200)}
-  .item-acao{
-    display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;padding:12px 4px;
-    background:none;border:0;font:inherit;color:var(--azul-900);cursor:pointer;transition:var(--transicao)
-  }
-  .item-acao:hover{background:var(--cinza-50)}
-  .item-acao svg{flex:none;margin-top:2px;color:var(--azul-600)}
-  .item-acao b{display:block;font-size:13.5px;font-weight:600}
-  .item-acao span{display:block;font-size:12px;color:var(--cinza-600)}
-  .item-acao.perigo{color:var(--vermelho-600)}
-  .item-acao.perigo svg{color:var(--vermelho-600)}
-
-  .situacao{display:flex;gap:10px;align-items:flex-start;border-radius:var(--raio-sm);padding:11px 12px;margin-bottom:14px;font-size:13px}
-  .situacao b{display:block;font-size:13.5px;margin-bottom:2px}
-  .situacao p{margin:0}
-  .situacao-aviso{background:#fff8e6;color:var(--amarelo-900);border:1px solid #f5e0a8}
-  .situacao-neutra{background:var(--cinza-100);color:var(--azul-800);border:1px solid var(--cinza-300)}
+  .fundo-dialogo{position:fixed;inset:0;background:rgba(15,22,29,.62);display:flex;align-items:center;justify-content:center;padding:16px;z-index:99}
+  .dialogo{background:#fff;border-radius:var(--raio);width:min(460px,100%);padding:20px;box-shadow:var(--sombra);border-top:4px solid var(--amarelo-500)}
   .preco{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
-  .preco b{font-size:24px;letter-spacing:-.4px}
-  .preco span{font-size:12px;color:var(--cinza-600)}
-
-  .pix-rotulo{font-size:12px;color:var(--cinza-600);margin:0 0 2px;text-align:center}
-  .pix-valor{font-size:28px;font-weight:700;letter-spacing:-.5px;margin:0 0 10px;text-align:center}
-  .pix-qr{display:block;margin:0 auto 10px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);padding:6px;background:#fff}
-  .pix-tempo{text-align:center;font-weight:600;color:var(--amarelo-900);font-size:13px;margin:0 0 12px}
-  .linha-codigo{display:flex;gap:6px;margin-bottom:10px}
-  .linha-codigo .campo{font-size:11.5px;padding:7px 8px;background:var(--cinza-100)}
-  .linha-codigo .btn{flex:none}
-  .aguardando{font-size:12.5px;color:var(--verde-900);background:#eaf7f4;border-radius:var(--raio-sm);padding:8px 10px;margin:0 0 4px;text-align:center}
-
-  .barra{
-    display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 14px;
-    background:var(--azul-800);color:#c3cdd8;font-size:12.5px;border-bottom:2px solid var(--amarelo-500)
-  }
-  .barra-marca{display:inline-flex;align-items:center;gap:8px;color:#fff;font-size:13px}
-  .barra-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:99px;border:1px solid transparent}
-  .chip-ok{background:rgba(0,177,157,.18);border-color:rgba(0,177,157,.5);color:#8ff0e2}
-  .chip-aviso{background:rgba(242,169,0,.16);border-color:rgba(242,169,0,.55);color:var(--amarelo-300)}
-  .barra-espaco{flex:1 1 0}
+  .preco b{font-size:24px}
+  .barra{display:flex;align-items:center;gap:14px;padding:8px 14px;background:var(--azul-800);color:#fff;font-size:12.5px;border-bottom:2px solid var(--amarelo-500)}
   .quadro{flex:1 1 auto;min-height:0;background:#fff}
-  .quadro iframe{display:block;width:100%;height:100%;border:0}
 </style>
 </head>
 <body>
-<div id="avisos" class="avisos" role="status" aria-live="polite" aria-atomic="true"></div>
-<noscript><div class="sem-js">Este portal precisa de JavaScript habilitado no navegador.</div></noscript>
 <main id="tela" class="tela">
-  <section class="cartao" id="cartao" aria-busy="true"><p class="carregando" role="status">Carregando o portal…</p></section>
+  <section class="cartao" id="cartao"><p>Carregando o portal…</p></section>
 </main>
-<div id="camada" class="camada"></div>
 
 <script>
 const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
-
-  versao: "1.5.1",
-  termosVersao: "2026-10-22",
-
-  funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
-  funcoesNovas: { acesso: "acesso-app", gerenciar: "gerenciar-assinatura" },
-
-  expiracaoPixSegundos: 300,
-  isolarConteudo: false,
-  analitica: true,
-
-  suporteWhatsapp: "5547992399616",
-  suporteEmail: "goudardimports@gmail.com",
-
-  ajuda: [
-    { q: "Como uso a calculadora?", a: "Digite as medidas no formulário e use o botão de calcular. O resultado pode ser impresso ou salvo no seu computador." },
-    { q: "Como faço para assinar?", a: "Escolha cartão ou PIX na tela de assinatura. No cartão você é levado para o ambiente seguro; no PIX, escaneie o código e a liberação é automática." },
-    { q: "Esqueci minha senha. E agora?", a: "Na tela de entrada use \"Esqueci minha senha\" e envie o link para o seu e-mail para definir uma senha nova." },
-    { q: "Como cancelo a assinatura?", a: "No botão Conta, escolha Cancelar assinatura. Você continua com acesso até a data já paga." }
-  ]
+  versao: "1.5.3",
+  funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" }
 };
 
-const SUPABASE_URL = CFG.supabaseUrl;
-const SUPABASE_ANON_KEY = CFG.supabaseAnonKey;
+const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey);
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const brl = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const SANDBOX_CONTEUDO = CFG.isolarConteudo 
-  ? "allow-scripts allow-forms allow-modals allow-popups allow-downloads" 
-  : "allow-scripts allow-forms allow-modals allow-popups allow-same-origin allow-downloads";
-
-const URL_RETORNO = location.origin + location.pathname;
-
-const $ = function (id) { return document.getElementById(id); };
-const esc = function (t) {
-  return String(t === null || t === undefined ? "" : t).replace(/[&<>"']/g, function (c) {
-    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-  });
-};
-const brl = function (v) { return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); };
-const fmtData = function (d) {
-  if (!d) return "—";
-  const t = new Date(d);
-  return isNaN(t.getTime()) ? "—" : t.toLocaleDateString("pt-BR");
-};
-const plural = function (n, s) { return n + " " + s + (n === 1 ? "" : "s"); };
-
-const ICONES = {
-  escudo: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11.5 14.5 16 10"/>',
-  olho: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
-  olhoFechado: '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>',
-  copiar: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-  alerta: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-  ok: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
-  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
-  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
-  usuario: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-  ajuda: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-  suporte: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
-  lixeira: '<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
-  cartao: '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
-  pix: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M19 19h2v2h-2z"/>',
-  sair: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
-  cadeado: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-  atualizar: '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>'
-};
-
-function ico(nome, tam) {
-  const g = ICONES[nome] || ICONES.info;
-  return '<svg width="' + (tam || 18) + '" height="' + (tam || 18) + '" viewBox="0 0 24 24" fill="none" ' +
-    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + g + "</svg>";
-}
-
-const sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-let acessoAtual = null;
-let modoRecuperacao = /type=recovery/.test(location.hash) || /type=recovery/.test(location.search);
-let intervaloTimerPix = null, intervaloConsultaPix = null, intervaloVersao = null;
-
-function notificar(texto, tipo) {
-  tipo = tipo || "info";
-  const nota = $("nota");
-  if (nota) { nota.className = "nota nota-" + tipo; nota.textContent = texto; }
-  const container = $("avisos");
-  if (!container) return;
-  const el = document.createElement("div");
-  el.className = "aviso";
-  el.innerHTML = ico("info", 18) + "<span>" + esc(texto) + "</span>";
-  container.appendChild(el);
-  setTimeout(function () { el.remove(); }, 5600);
-}
-function limparNota() { const n = $("nota"); if (n) { n.className = "nota"; n.textContent = ""; } }
-
-function textoErro(err) {
-  const m = (err && (err.message || err.error_description || err.msg || err.error)) || "";
-  const s = String(m).toLowerCase();
-  if (/failed to fetch|networkerror/.test(s)) return "Sem conexão com o servidor. Verifique sua internet.";
-  if (/invalid login credentials/.test(s)) return "E-mail ou senha incorretos.";
-  if (/already registered/.test(s)) return "Este e-mail já está cadastrado.";
-  return m || "Não foi possível concluir a operação.";
-}
-
-function travar(botao, texto) {
-  if (!botao) return;
-  if (!botao.dataset.rotulo) botao.dataset.rotulo = (botao.textContent || "").trim();
-  botao.disabled = true;
-  botao.textContent = texto || "Aguarde…";
-}
-function liberar(botao, rotulo) {
-  if (!botao) return;
-  botao.disabled = false;
-  botao.textContent = rotulo || botao.dataset.rotulo || "Continuar";
-}
-function marcarInvalido(campo) {
-  if (!campo) return;
-  campo.classList.add("campo-invalido");
-  if (campo.focus) campo.focus();
-}
-
-function abrirDialogo(opt) {
-  const camada = $("camada");
-  const fundo = document.createElement("div");
-  fundo.className = "fundo-dialogo";
-  const idTitulo = "dlg-" + Math.random().toString(36).slice(2, 8);
-  fundo.innerHTML =
-    '<div class="dialogo" role="dialog" aria-modal="true" aria-labelledby="' + idTitulo + '">' +
-      '<div class="dialogo-topo"><h2 id="' + idTitulo + '">' + esc(opt.titulo) + "</h2>" +
-        '<button type="button" class="btn-icone" data-fechar aria-label="Fechar">' + ico("x", 18) + "</button></div>" +
-      '<div class="dialogo-corpo">' + (opt.conteudo || "") + "</div>" +
-      '<div class="dialogo-acoes"></div>' +
-    "</div>";
-  const caixa = fundo.querySelector(".dialogo");
-  const areaAcoes = fundo.querySelector(".dialogo-acoes");
-
-  const fechar = function () {
-    if (!fundo.isConnected) return;
-    if (opt.aoFechar) opt.aoFechar();
-    fundo.remove();
-  };
-  (opt.acoes || []).forEach(function (a) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "btn " + (a.variante || "btn-primario");
-    b.innerHTML = (a.icone ? ico(a.icone, 17) : "") + esc(a.rotulo);
-    b.onclick = function () { if (a.aoClicar) a.aoClicar({ fechar: fechar, botao: b, caixa: caixa }); };
-    areaAcoes.appendChild(b);
-  });
-  if (!(opt.acoes || []).length) areaAcoes.remove();
-
-  fundo.querySelectorAll("[data-fechar]").forEach(function (b) { b.onclick = fechar; });
-  camada.appendChild(fundo);
-  return { fechar: fechar, caixa: caixa };
-}
-
-function confirmar(opt) {
-  return new Promise(function (resolve) {
-    let resposta = false;
-    abrirDialogo({
-      titulo: opt.titulo,
-      conteudo: '<p>' + (opt.texto || "") + "</p>",
-      acoes: [
-        { rotulo: "Cancelar", variante: "btn-fantasma", aoClicar: function (d) { d.fechar(); } },
-        { rotulo: opt.rotuloOk || "Confirmar", variante: opt.perigoso ? "btn-perigo" : "btn-primario", aoClicar: function (d) { resposta = true; d.fechar(); } }
-      ],
-      aoFechar: function () { resolve(resposta); }
-    });
-  });
-}
-
-async function track(evento, dados) {
-  if (!CFG.analitica) return;
-  try {
-    let uid = null;
-    const s = await sb.auth.getSession();
-    if (s && s.data && s.data.session) uid = s.data.session.user.id;
-    await sb.from("eventos").insert({ evento: evento, dados: dados || {}, user_id: uid, portal_versao: CFG.versao, criado_em: new Date().toISOString() });
-  } catch (e) {}
-}
-
-async function obterSessao() {
-  try {
-    const { data } = await sb.auth.getSession();
-    return (data && data.session) || null;
-  } catch (e) { return null; }
-}
-function marcarForaDoApp() {
-  document.body.classList.remove("modo-app");
-  const tela = $("tela");
-  if (tela) tela.className = "tela";
-}
-function limparTimers() {
-  [intervaloTimerPix, intervaloConsultaPix, intervaloVersao].forEach(function (i) { if (i) clearInterval(i); });
-  intervaloTimerPix = null; intervaloConsultaPix = null; intervaloVersao = null;
-}
-
-function garantirCartao() {
-  let cartao = $("cartao");
-  if (cartao) return cartao;
-  const tela = $("tela");
-  tela.innerHTML = '<section class="cartao" id="cartao" aria-busy="true"></section>';
-  return $("cartao");
-}
 function mostrarCartao(html) {
-  marcarForaDoApp();
-  const cartao = garantirCartao();
-  cartao.setAttribute("aria-busy", "false");
-  cartao.innerHTML = html;
-}
-function ligarOlhos() {
-  document.querySelectorAll(".btn-olho").forEach(function (b) {
-    b.onclick = function () {
-      const campo = $(b.dataset.alvo);
-      if (!campo) return;
-      const mostrar = campo.type === "password";
-      campo.type = mostrar ? "text" : "password";
-      b.innerHTML = ico(mostrar ? "olhoFechado" : "olho", 20);
-      campo.focus();
-    };
-  });
-}
-function rodapeLinks() {
-  return '<p class="rodape">Portal v' + esc(CFG.versao) + ' · <a href="termos.html" target="_blank" rel="noopener">Termos de Uso</a> · <a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a></p>';
-}
-function campoSenha(id, rotulo, autocomplete) {
-  return '<div class="grupo"><label class="rotulo" for="' + id + '">' + rotulo + "</label>" +
-    '<div class="campo-senha"><input class="campo" id="' + id + '" type="password" autocomplete="' + autocomplete + '" required>' +
-    '<button type="button" class="btn-olho" data-alvo="' + id + '" aria-label="Mostrar senha">' + ico("olho", 20) + "</button></div></div>";
+  document.body.classList.remove("modo-app");
+  $("cartao").innerHTML = html;
 }
 
-/* ---------- LOGIN ---------- */
-function telaLogin(mensagemInicial) {
-  limparTimers();
+function telaLogin() {
   mostrarCartao(
-    '<div class="marca">' + ico("escudo", 22) + "<h1>Orçamento de Caldeiraria</h1></div>" +
-    '<p class="sub">Entre na sua conta ou crie um cadastro novo.</p>' +
+    '<div class="marca"><h1>Orçamento de Caldeiraria</h1></div>' +
+    '<p class="sub">Entre na sua conta para continuar.</p>' +
     '<div id="nota" class="nota"></div>' +
-    '<form id="form-login" novalidate>' +
-      '<div class="grupo"><label class="rotulo" for="email">E-mail</label>' +
-      '<input class="campo" id="email" type="email" autocomplete="email" required placeholder="seu@email.com"></div>' +
-      campoSenha("senha", "Senha", "current-password") +
-      '<div style="margin:6px 0 14px;text-align:right"><button type="button" class="btn btn-limpo btn-xs" id="btn-esqueceu">Esqueceu a senha?</button></div>' +
-      '<button type="submit" class="btn btn-primario btn-bloco">Entrar</button>' +
-      '<button type="button" class="btn btn-fantasma btn-bloco" id="ir-cadastro">Criar conta nova</button>' +
-    "</form>" + rodapeLinks()
+    '<form id="form-login">' +
+      '<div class="grupo"><label class="rotulo">E-mail</label><input class="campo" id="email" type="email" required></div>' +
+      '<div class="grupo"><label class="rotulo">Senha</label><input class="campo" id="senha" type="password" required></div>' +
+      '<button type="submit" class="btn btn-primario">Entrar</button>' +
+    '</form>'
   );
-  ligarOlhos();
-  if (mensagemInicial) notificar(mensagemInicial, "info");
 
-  $("btn-esqueceu").onclick = function () { telaEsqueceuSenha(); };
-  $("ir-cadastro").onclick = function () { telaCadastro(); };
-
-  $("form-login").onsubmit = async function (e) {
+  $("form-login").onsubmit = async (e) => {
     e.preventDefault();
-    limparNota();
-    const email = $("email").value.trim();
-    const senha = $("senha").value;
-    if (!email) { marcarInvalido($("email")); return notificar("Informe seu e-mail.", "erro"); }
-    if (!senha) { marcarInvalido($("senha")); return notificar("Informe sua senha.", "erro"); }
-
-    const btn = this.querySelector('button[type="submit"]');
-    travar(btn, "Entrando…");
     try {
-      const { error } = await sb.auth.signInWithPassword({ email: email, password: senha });
+      const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("senha").value });
       if (error) throw error;
-      track("login_sucesso");
       carregarPortal();
     } catch (err) {
-      liberar(btn, "Entrar");
-      notificar(textoErro(err), "erro");
+      $("nota").className = "nota nota-erro";
+      $("nota").textContent = err.message || "Erro ao entrar.";
     }
   };
 }
 
-/* ---------- ESQUECEU SENHA ---------- */
-function telaEsqueceuSenha() {
-  mostrarCartao(
-    '<div class="marca">' + ico("email", 22) + "<h1>Recuperar senha</h1></div>" +
-    '<p class="sub">Enviaremos um link de recuperação para o seu e-mail.</p>' +
-    '<div id="nota" class="nota"></div>' +
-    '<form id="form-rec" novalidate>' +
-      '<div class="grupo"><label class="rotulo" for="email-rec">E-mail cadastrado</label>' +
-      '<input class="campo" id="email-rec" type="email" autocomplete="email" required placeholder="seu@email.com"></div>' +
-      '<button type="submit" class="btn btn-primario btn-bloco">Enviar link de recuperação</button>' +
-      '<button type="button" class="btn btn-fantasma btn-bloco" id="voltar">Voltar ao login</button>' +
-    "</form>" + rodapeLinks()
-  );
-  $("voltar").onclick = function () { telaLogin(); };
-  $("form-rec").onsubmit = async function (e) {
-    e.preventDefault();
-    limparNota();
-    const email = $("email-rec").value.trim();
-    if (!email) { marcarInvalido($("email-rec")); return notificar("Informe seu e-mail.", "erro"); }
-    const btn = this.querySelector('button[type="submit"]');
-    travar(btn, "Enviando…");
-    try {
-      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: URL_RETORNO });
-      if (error) throw error;
-      track("recuperacao_enviada", { email: email });
-      mostrarCartao(
-        '<div class="marca">' + ico("ok", 22) + "<h1>E-mail enviado</h1></div>" +
-        '<p class="sub">Se o e-mail <b>' + esc(email) + "</b> estiver cadastrado, você receberá o link em instantes.</p>" +
-        '<button type="button" class="btn btn-primario btn-bloco" id="ok">Voltar ao login</button>' + rodapeLinks()
-      );
-      $("ok").onclick = function () { telaLogin(); };
-    } catch (err) {
-      liberar(btn, "Enviar link de recuperação");
-      notificar(textoErro(err), "erro");
-    }
-  };
-}
+async function telaAssinar(precoSugerido) {
+  let preco = precoSugerido || 49.90;
 
-/* ---------- NOVA SENHA ---------- */
-function telaNovaSenha() {
-  mostrarCartao(
-    '<div class="marca">' + ico("cadeado", 22) + "<h1>Nova senha</h1></div>" +
-    '<p class="sub">Defina uma nova senha para a sua conta.</p>' +
-    '<div id="nota" class="nota"></div>' +
-    '<form id="form-nova" novalidate>' +
-      campoSenha("nova1", "Nova senha (mín. 8 caracteres)", "new-password") +
-      '<div style="margin-top:12px">' + campoSenha("nova2", "Confirme a nova senha", "new-password") + "</div>" +
-      '<button type="submit" class="btn btn-primario btn-bloco" style="margin-top:14px">Salvar nova senha</button>' +
-    "</form>" + rodapeLinks()
-  );
-  ligarOlhos();
-
-  $("form-nova").onsubmit = async function (e) {
-    e.preventDefault();
-    limparNota();
-    const s1 = $("nova1").value, s2 = $("nova2").value;
-    if (s1.length < 8) return notificar("A senha precisa ter pelo menos 8 caracteres.", "erro");
-    if (s1 !== s2) return notificar("As senhas não coincidem.", "erro");
-
-    const btn = this.querySelector('button[type="submit"]');
-    travar(btn, "Salvando…");
-    try {
-      const { error } = await sb.auth.updateUser({ password: s1 });
-      if (error) throw error;
-      track("senha_alterada");
-      modoRecuperacao = false;
-      if (history && history.replaceState) history.replaceState({}, document.title, location.pathname);
-      notificar("Senha alterada com sucesso!", "ok");
-      setTimeout(function () { carregarPortal(); }, 1200);
-    } catch (err) {
-      liberar(btn, "Salvar nova senha");
-      notificar(textoErro(err), "erro");
-    }
-  };
-}
-
-/* ---------- CADASTRO ---------- */
-function telaCadastro() {
-  mostrarCartao(
-    '<div class="marca">' + ico("escudo", 22) + "<h1>Criar conta nova</h1></div>" +
-    '<p class="sub">Cadastre seu e-mail para acessar o portal.</p>' +
-    '<div id="nota" class="nota"></div>' +
-    '<form id="form-cad" novalidate>' +
-      '<div class="grupo"><label class="rotulo" for="cad-email">E-mail</label>' +
-      '<input class="campo" id="cad-email" type="email" autocomplete="email" required placeholder="seu@email.com"></div>' +
-      campoSenha("cad-senha1", "Senha (mín. 8 caracteres)", "new-password") +
-      '<div style="margin-top:12px">' + campoSenha("cad-senha2", "Confirme a senha", "new-password") + "</div>" +
-      '<label class="aceite"><input type="checkbox" id="cad-termos" required><span>Li e aceito os <a href="termos.html" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>' +
-      '<button type="submit" class="btn btn-primario btn-bloco" style="margin-top:14px">Criar conta</button>' +
-      '<button type="button" class="btn btn-fantasma btn-bloco" id="voltar">Já tenho conta · Entrar</button>' +
-    "</form>" + rodapeLinks()
-  );
-  ligarOlhos();
-  $("voltar").onclick = function () { telaLogin(); };
-
-  $("form-cad").onsubmit = async function (e) {
-    e.preventDefault();
-    limparNota();
-    const email = $("cad-email").value.trim();
-    const s1 = $("cad-senha1").value, s2 = $("cad-senha2").value;
-    const termos = $("cad-termos").checked;
-
-    if (!email) { marcarInvalido($("cad-email")); return notificar("Informe seu e-mail.", "erro"); }
-    if (s1.length < 8) return notificar("A senha precisa ter pelo menos 8 caracteres.", "erro");
-    if (s1 !== s2) return notificar("As senhas não coincidem.", "erro");
-    if (!termos) return notificar("Você precisa aceitar os Termos de Uso e Privacidade.", "erro");
-
-    const btn = this.querySelector('button[type="submit"]');
-    travar(btn, "Criando conta…");
-    try {
-      const { data, error } = await sb.auth.signUp({
-        email: email, password: s1,
-        options: { data: { aceite_termos: CFG.termosVersao, aceite_em: new Date().toISOString() } }
-      });
-      if (error) throw error;
-      track("cadastro_sucesso", { email: email });
-
-      if (data && data.session) {
-        carregarPortal();
-      } else {
-        mostrarCartao(
-          '<div class="marca">' + ico("ok", 22) + "<h1>Confirme seu e-mail</h1></div>" +
-          '<p class="sub">Enviamos uma mensagem de confirmação para <b>' + esc(email) + "</b>. Abra o e-mail para ativar a conta.</p>" +
-          '<button type="button" class="btn btn-primario btn-bloco" id="ok">Ir para o login</button>' + rodapeLinks()
-        );
-        $("ok").onclick = function () { telaLogin(); };
-      }
-    } catch (err) {
-      liberar(btn, "Criar conta");
-      notificar(textoErro(err), "erro");
-    }
-  };
-}
-
-/* ---------- ASSINATURA ---------- */
-function telaAssinar(dadosAcesso, precoAtual) {
-  let preco = Number(precoAtual || (dadosAcesso && dadosAcesso.preco) || 49.90);
-  
-  let motivoTxt = "Sua assinatura não está ativa.";
-  if (dadosAcesso && dadosAcesso.motivo === "expirado") {
-    motivoTxt = "Sua assinatura expirou em " + fmtData(dadosAcesso.valid_until) + ". Renove para continuar.";
-  }
-
-  const renderizarTela = (p) => {
-    const rotCartao = "Assinar com Cartão · " + brl(p) + "/mês";
-    const rotPix = "Pagar com PIX · " + brl(p);
-
+  const render = (p) => {
     mostrarCartao(
-      '<div class="marca">' + ico("escudo", 22) + "<h1>Assinatura necessária</h1></div>" +
-      '<p class="sub">Desbloqueie o acesso completo à Calculadora de Caldeiraria.</p>' +
-      '<div id="nota" class="nota"></div>' +
-      '<div class="situacao situacao-aviso">' + ico("alerta", 20) + '<div><b>Acesso indisponível</b><p>' + esc(motivoTxt) + "</p></div></div>" +
-      '<div class="preco"><span>Plano Profissional</span><b id="txt-preco">' + brl(p) + '<span>/ mês</span></b></div>' +
-      '<button type="button" class="btn btn-destaque btn-bloco" id="btn-cartao">' + ico("cartao", 18) + esc(rotCartao) + "</button>" +
-      '<button type="button" class="btn btn-pix btn-bloco" id="btn-pix">' + ico("pix", 18) + esc(rotPix) + "</button>" +
-      '<button type="button" class="btn btn-fantasma btn-bloco" id="btn-verificar">' + ico("atualizar", 17) + "Já paguei · Verificar novamente</button>" +
-      '<button type="button" class="btn btn-limpo btn-bloco" id="btn-conta" style="margin-top:10px">' + ico("usuario", 16) + "Gerenciar minha conta · Sair</button>" +
-      rodapeLinks()
+      '<div class="marca"><h1>Assinatura necessária</h1></div>' +
+      '<p class="sub">Desbloqueie o acesso completo à Calculadora.</p>' +
+      '<div class="preco"><span>Plano Profissional</span><b>' + brl(p) + '<span>/ mês</span></b></div>' +
+      '<button type="button" class="btn btn-destaque" id="btn-cartao">Assinar com Cartão · ' + brl(p) + '/mês</button>' +
+      '<button type="button" class="btn btn-pix" id="btn-pix">Pagar com PIX · ' + brl(p) + '</button>' +
+      '<button type="button" class="btn btn-fantasma" id="btn-verificar">Verificar novamente</button>' +
+      '<button type="button" class="btn btn-limpo" id="btn-sair">Sair da conta</button>'
     );
 
-    $("btn-cartao").onclick = async function () {
-      const btn = this;
-      travar(btn, "Redirecionando…");
+    $("btn-cartao").onclick = async () => {
       try {
         const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: "cartao" } });
         if (error) throw error;
-        if (data && data.url) { location.href = data.url; }
-      } catch (err) {
-        liberar(btn, rotCartao);
-        notificar(textoErro(err), "erro");
+        if (data && data.url) {
+          location.href = data.url;
+        } else {
+          alert("Link de pagamento não retornado.");
+        }
+      } catch (e) {
+        alert("Erro ao redirecionar para o cartão.");
       }
     };
 
-    $("btn-pix").onclick = async function () {
-      const btn = this;
-      travar(btn, "Gerando QR Code PIX…");
+    $("btn-pix").onclick = async () => {
       try {
         const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: "pix" } });
         if (error) throw error;
         abrirModalPix(data, p);
-      } catch (err) {
-        liberar(btn, rotPix);
-        notificar(textoErro(err), "erro");
-      } finally {
-        liberar(btn, rotPix);
+      } catch (e) {
+        alert("Erro ao gerar PIX.");
       }
     };
 
-    $("btn-verificar").onclick = async function () {
-      travar(this, "Verificando…");
-      await carregarPortal();
-    };
-
-    $("btn-conta").onclick = function () { abrirMenuConta(); };
+    $("btn-verificar").onclick = () => carregarPortal();
+    $("btn-sair").onclick = async () => { await sb.auth.signOut(); telaLogin(); };
   };
 
-  renderizarTela(preco);
+  render(preco);
 
-  // Busca o preço atualizado do Secret sem travar a interface
+  // Puxa o preço dos Secrets atualizados no Supabase em segundo plano
   sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "obter_preco" } })
     .then(({ data }) => {
       if (data && data.preco && Number(data.preco) !== preco) {
         preco = Number(data.preco);
-        renderizarTela(preco);
+        render(preco);
       }
     }).catch(() => {});
 }
 
 function abrirModalPix(dadosPix, precoAtual) {
-  const codigo = dadosPix.qr_code;
-  const base64 = dadosPix.qr_code_base64;
-  const valor = Number(dadosPix.valor || precoAtual || 49.90);
-  let segundosRestantes = Number(dadosPix.expiracao_segundos || CFG.expiracaoPixSegundos);
+  const d = document.createElement("div");
+  d.className = "fundo-dialogo";
+  const qrBase64 = dadosPix.qr_code_base64 || dadosPix.point_of_interaction?.transaction_data?.qr_code_base64 || "";
+  const qrCode = dadosPix.qr_code || dadosPix.point_of_interaction?.transaction_data?.qr_code || "";
 
-  const d = abrirDialogo({
-    titulo: "Pagamento via PIX",
-    conteudo:
-      '<div class="pix-rotulo">Valor da assinatura</div>' +
-      '<div class="pix-valor">' + brl(valor) + "</div>" +
-      '<img class="pix-qr" src="data:image/png;base64,' + base64 + '" alt="QR Code PIX" width="180" height="180">' +
-      '<div id="pix-tempo" class="pix-tempo">Expira em 05:00</div>' +
-      '<div class="linha-codigo"><input class="campo" id="pix-copia" type="text" readonly value="' + esc(codigo) + '">' +
-      '<button type="button" class="btn btn-primario btn-xs" id="btn-copiar">Copiar</button></div>' +
-      '<div class="aguardando">Aguardando pagamento… liberação automática</div>',
-    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }],
-    aoFechar: function () { limparTimers(); }
-  });
-
-  const elTempo = d.caixa.querySelector("#pix-tempo");
-  const btnCopia = d.caixa.querySelector("#btn-copiar");
-
-  btnCopia.onclick = async function () {
-    try {
-      await navigator.clipboard.writeText(codigo);
-      btnCopia.textContent = "Copiado!";
-      setTimeout(function () { btnCopia.textContent = "Copiar"; }, 2000);
-    } catch (e) { notificar("Selecione e copie manualmente.", "info"); }
-  };
-
-  limparTimers();
-  intervaloTimerPix = setInterval(function () {
-    segundosRestantes--;
-    if (segundosRestantes <= 0) {
-      clearInterval(intervaloTimerPix);
-      if (elTempo) elTempo.textContent = "O código PIX expirou.";
-      return;
-    }
-    const m = Math.floor(segundosRestantes / 60), s = segundosRestantes % 60;
-    if (elTempo) elTempo.textContent = "Expira em " + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-  }, 1000);
-
-  intervaloConsultaPix = setInterval(async function () {
-    const sessao = await obterSessao();
-    if (!sessao) return;
-    const acc = await verificarAcessoServidor();
-    if (acc && acc.ativo) {
-      limparTimers();
-      d.fechar();
-      notificar("Pagamento confirmado! Acesso liberado.", "ok");
-      carregarPortal();
-    }
-  }, 5000);
-}
-
-/* ---------- MENU DA CONTA ---------- */
-async function abrirMenuConta() {
-  const sessao = await obterSessao();
-  const email = sessao ? sessao.user.email : "Visitante";
-  const dadosAcc = acessoAtual || {};
-
-  const html =
-    '<div class="situacao situacao-neutra" style="margin-bottom:12px">' + ico("usuario", 20) +
-    '<div><b>' + esc(email) + '</b><p>Status: ' + (dadosAcc.ativo ? '<b>Assinatura ativa</b> (expira em ' + fmtData(dadosAcc.valid_until) + ')' : 'Sem assinatura ativa') + '</p></div></div>' +
-    '<ul class="lista-acoes">' +
-      '<li><button type="button" class="item-acao" id="acao-senha">' + ico("cadeado", 20) + '<div><b>Alterar senha</b><span>Definir uma senha nova para a conta</span></div></button></li>' +
-      (dadosAcc.ativo ? '<li><button type="button" class="item-acao" id="acao-cancelar">' + ico("alerta", 20) + '<div><b>Cancelar assinatura</b><span>Interrompe renovações futuras</span></div></button></li>' : '') +
-      '<li><button type="button" class="item-acao" id="acao-ajuda">' + ico("ajuda", 20) + '<div><b>Ajuda e dúvidas frequentes</b><span>Respostas rápidas sobre o portal</span></div></button></li>' +
-      (CFG.suporteWhatsapp || CFG.suporteEmail ? '<li><button type="button" class="item-acao" id="acao-suporte">' + ico("suporte", 20) + '<div><b>Falar com o suporte</b><span>Atendimento por WhatsApp ou e-mail</span></div></button></li>' : '') +
-      '<li><button type="button" class="item-acao perigo" id="acao-excluir">' + ico("lixeira", 20) + '<div><b>Excluir conta permanentemente</b><span>Apaga todos os dados e o acesso</span></div></button></li>' +
-      '<li><button type="button" class="item-acao" id="acao-sair">' + ico("sair", 20) + '<div><b>Sair da conta</b><span>Encerra a sessão neste dispositivo</span></div></button></li>' +
-    '</ul>';
-
-  const d = abrirDialogo({
-    titulo: "Minha Conta",
-    conteudo: html,
-    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
-  });
-
-  const caixa = d.caixa, fecharDlg = d.fechar;
-
-  caixa.querySelector("#acao-senha").onclick = function () { fecharDlg(); fluxoAlterarSenha(); };
-  const btnCanc = caixa.querySelector("#acao-cancelar");
-  if (btnCanc) btnCanc.onclick = function () { fecharDlg(); fluxoCancelarAssinatura(); };
-  caixa.querySelector("#acao-ajuda").onclick = function () { fecharDlg(); abrirAjuda(); };
-  const btnSup = caixa.querySelector("#acao-suporte");
-  if (btnSup) btnSup.onclick = function () { fecharDlg(); abrirSuporte(); };
-  caixa.querySelector("#acao-excluir").onclick = function () { fecharDlg(); fluxoExcluirConta(); };
-  caixa.querySelector("#acao-sair").onclick = async function () {
-    fecharDlg();
-    await sb.auth.signOut();
-    telaLogin();
-  };
-}
-
-async function fluxoAlterarSenha() {
-  abrirDialogo({
-    titulo: "Alterar Senha",
-    conteudo:
-      '<div id="nota-dlg" class="nota"></div>' +
-      '<form id="form-alt" novalidate>' +
-        campoSenha("alt-s1", "Nova senha (mín. 8 caracteres)", "new-password") +
-        '<div style="margin-top:12px">' + campoSenha("alt-s2", "Confirme a nova senha", "new-password") + '</div>' +
-      '</form>',
-    acoes: [
-      { rotulo: "Cancelar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } },
-      { rotulo: "Salvar nova senha", variante: "btn-primario", aoClicar: async function (dlg) {
-          const s1 = $("alt-s1").value, s2 = $("alt-s2").value;
-          const nota = dlg.caixa.querySelector("#nota-dlg");
-          if (s1.length < 8) { nota.className = "nota nota-erro"; nota.textContent = "A senha precisa ter pelo menos 8 caracteres."; return; }
-          if (s1 !== s2) { nota.className = "nota nota-erro"; nota.textContent = "As senhas não coincidem."; return; }
-          try {
-            const { error } = await sb.auth.updateUser({ password: s1 });
-            if (error) throw error;
-            dlg.fechar();
-            notificar("Senha alterada com sucesso!", "ok");
-          } catch (err) {
-            nota.className = "nota nota-erro";
-            nota.textContent = textoErro(err);
-          }
-        }
-      }
-    ]
-  });
-  ligarOlhos();
-}
-
-async function fluxoCancelarAssinatura() {
-  const ok = await confirmar({
-    titulo: "Cancelar assinatura?",
-    texto: "Sua assinatura não será renovada no próximo ciclo. Você continuará com acesso até o fim do período já pago.",
-    rotuloOk: "Sim, cancelar",
-    perigoso: true
-  });
-  if (!ok) return;
-
-  try {
-    let resp = await sb.functions.invoke(CFG.funcoesNovas.gerenciar, { body: { acao: "cancelar" } }).catch(() => null);
-    if (!resp || resp.error) {
-      resp = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "cancelar" } });
-    }
-    if (resp.error) throw resp.error;
-    notificar("Assinatura cancelada. O acesso permanece ativo até o fim do período.", "ok");
-    carregarPortal();
-  } catch (err) { notificar(textoErro(err), "erro"); }
-}
-
-async function fluxoExcluirConta() {
-  const ok = await confirmar({
-    titulo: "Excluir conta permanentemente?",
-    texto: "ATENÇÃO: esta operação apaga todos os seus dados deste portal de forma irreversível.",
-    rotuloOk: "Sim, excluir minha conta",
-    perigoso: true
-  });
-  if (!ok) return;
-
-  try {
-    const { data, error } = await sb.functions.invoke(CFG.funcoes.conta);
-    if (error || (data && data.error)) throw (error || new Error(data.error));
-    await sb.auth.signOut();
-    mostrarCartao('<div class="marca">' + ico("ok", 22) + "<h1>Conta excluída</h1></div><p class=\"sub\">Sua conta foi excluída com sucesso.</p><button type=\"button\" class=\"btn btn-primario btn-bloco\" id=\"ok\">Voltar ao início</button>");
-    $("ok").onclick = function () { telaLogin(); };
-  } catch (err) { notificar(textoErro(err), "erro"); }
-}
-
-function abrirAjuda() {
-  let html = '<ul class="lista-acoes">';
-  CFG.ajuda.forEach(function (item) {
-    html += '<li style="padding:10px 0;border-bottom:1px solid var(--cinza-200)">' +
-      '<b style="font-size:13.5px;color:var(--azul-900);margin-bottom:2px">' + esc(item.q) + '</b>' +
-      '<span style="font-size:13px;color:var(--cinza-600);display:block">' + esc(item.a) + "</span></li>";
-  });
-  html += "</ul>";
-  abrirDialogo({
-    titulo: "Ajuda e Dúvidas",
-    conteudo: html,
-    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
-  });
-}
-
-function abrirSuporte() {
-  let html = '<p>Escolha uma forma de contato com o suporte:</p><div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">';
-  if (CFG.suporteWhatsapp) {
-    html += '<a class="btn btn-pix" href="https://wa.me/' + CFG.suporteWhatsapp + '" target="_blank" rel="noopener">Falar pelo WhatsApp</a>';
-  }
-  if (CFG.suporteEmail) {
-    html += '<a class="btn btn-fantasma" href="mailto:' + CFG.suporteEmail + '">Enviar e-mail para ' + esc(CFG.suporteEmail) + "</a>";
-  }
-  html += "</div>";
-  abrirDialogo({
-    titulo: "Suporte Técnico",
-    conteudo: html,
-    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (dlg) { dlg.fechar(); } }]
-  });
-}
-
-async function verificarAcessoServidor() {
-  try {
-    const { data: ass, error } = await sb.from("assinaturas").select("status,valid_until,ativado_em").maybeSingle();
-    if (error || !ass || !ass.valid_until) return { ativo: false, valid_until: null, motivo: "sem_assinatura" };
-    const exp = new Date(ass.valid_until);
-    const ativo = exp.getTime() > Date.now();
-    return { ativo: ativo, valid_until: ass.valid_until, motivo: ativo ? "ativo" : "expirado" };
-  } catch (err) { return { ativo: false, valid_until: null, motivo: "erro" }; }
+  d.innerHTML = '<div class="dialogo" style="text-align:center">' +
+    '<h2>Pagamento via PIX</h2>' +
+    '<p style="font-size:22px;font-weight:bold;margin:10px 0">' + brl(dadosPix.valor || precoAtual) + '</p>' +
+    (qrBase64 ? '<img src="data:image/png;base64,' + qrBase64 + '" width="160" height="160" style="margin:10px 0">' : '<p>Escaneie o código copia e cola</p>') +
+    '<input class="campo" type="text" readonly value="' + esc(qrCode) + '" style="font-size:11px;margin-bottom:10px">' +
+    '<button class="btn btn-primario" id="fechar-pix">Fechar</button>' +
+    '</div>';
+  document.body.appendChild(d);
+  d.querySelector("#fechar-pix").onclick = () => d.remove();
 }
 
 async function carregarPortal() {
-  limparTimers();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { telaLogin(); return; }
 
-  const hash = location.hash || "", query = location.search || "";
-  if (hash.includes("type=recovery") || query.includes("type=recovery") || modoRecuperacao) {
-    modoRecuperacao = true;
-    telaNovaSenha();
+  const { data: ass } = await sb.from("assinaturas").select("valid_until").maybeSingle();
+  if (!ass || !ass.valid_until || new Date(ass.valid_until).getTime() <= Date.now()) {
+    telaAssinar();
     return;
   }
 
-  const sessao = await obterSessao();
-  if (!sessao) { telaLogin(); return; }
-
-  const acc = await verificarAcessoServidor();
-  acessoAtual = acc;
-
-  if (!acc.ativo) { telaAssinar(acc); return; }
-
-  await montarAplicativo(acc);
-}
-
-async function montarAplicativo(acc) {
   document.body.classList.add("modo-app");
-  const tela = $("tela");
-  tela.className = "tela tela-app";
-  tela.innerHTML = '<div class="carregando" style="padding:20px" role="status">Carregando calculadora…</div>';
-
-  let htmlConteudo = "";
-  try {
-    const { data } = await sb.from("app_conteudo").select("html").eq("id", 1).maybeSingle();
-    if (data) htmlConteudo = data.html || "";
-  } catch (e) {}
-
-  const exp = new Date(acc.valid_until);
-  const dias = Math.max(0, Math.ceil((exp.getTime() - Date.now()) / 86400000));
-
-  tela.innerHTML =
-    '<header class="barra" role="banner">' +
-      '<div class="barra-marca">' + ico("escudo", 18) + '<b>Orçamento de Caldeiraria</b></div>' +
-      '<div class="barra-chip ' + (dias <= 5 ? "chip-aviso" : "chip-ok") + '"><span>Acesso até <b>' + fmtData(exp) + "</b> (" + plural(dias, "dia") + ")</span></div>" +
-      '<div class="barra-espaco"></div>' +
-      '<button type="button" class="btn btn-fantasma btn-xs" id="btn-menu-conta">' + ico("usuario", 15) + "Conta</button>" +
-    "</header>" +
-    '<section class="quadro" aria-label="Aplicativo principal">' +
-      '<iframe id="iframe-app" sandbox="' + SANDBOX_CONTEUDO + '" title="Calculadora de Caldeiraria"></iframe>' +
-    '</section>';
-
-  const iframe = $("iframe-app");
-  if (iframe) iframe.srcdoc = htmlConteudo;
-
-  $("btn-menu-conta").onclick = function () { abrirMenuConta(); };
+  $("tela").className = "tela tela-app";
+  $("tela").innerHTML = '<header class="barra"><b>Calculadora Ativa</b> <button class="btn btn-fantasma" style="width:auto;padding:4px 10px;margin:0" id="sair">Sair</button></header><section class="quadro"><iframe srcdoc="<h1>Bem-vindo à Calculadora!</h1>" style="width:100%;height:100%;border:0"></iframe></section>';
+  $("sair").onclick = async () => { await sb.auth.signOut(); telaLogin(); };
 }
 
-window.addEventListener("DOMContentLoaded", function () {
-  if (!sb) {
-    mostrarCartao('<div class="marca">' + ico("alerta", 22) + "<h1>Erro</h1></div><p class=\"sub\">Erro ao carregar o Supabase.</p>");
-    return;
-  }
-
-  sb.auth.onAuthStateChange(function (evento) {
-    if (evento === "PASSWORD_RECOVERY") {
-      modoRecuperacao = true;
-      telaNovaSenha();
-    }
-  });
-
-  carregarPortal();
-});
+window.addEventListener("DOMContentLoaded", () => carregarPortal());
 </script>
 </body>
 </html>
