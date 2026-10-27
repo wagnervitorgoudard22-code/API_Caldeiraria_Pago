@@ -10,224 +10,1529 @@
 <style>
   *,*::before,*::after{box-sizing:border-box}
   :root{
+    /* Marca */
     --azul-900:#16212c; --azul-800:#1c2630; --azul-700:#27384a; --azul-600:#3d5066;
     --cinza-50:#f7f8fa; --cinza-100:#f1f3f5; --cinza-200:#e6e9ec; --cinza-300:#cfd6dc; --cinza-600:#5d6b78;
     --amarelo-500:#f2a900; --amarelo-300:#ffd675; --amarelo-900:#5a3f00;
     --verde-500:#00b19d; --verde-700:#00806f; --verde-900:#0b5c51;
     --vermelho-600:#b3261e; --vermelho-100:#fdeceb;
+    /* Sistema */
     --fonte:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --raio:8px; --raio-sm:4px;
     --sombra:0 10px 30px -12px rgba(22,33,44,.35);
+    --sombra-forte:0 18px 45px -16px rgba(22,33,44,.45);
+    --foco:0 0 0 3px rgba(39,56,74,.32);
+    --transicao:all .18s cubic-bezier(.4,0,.2,1);
   }
-  html,body{height:100%; width:100%; margin:0; padding:0; overflow:hidden;}
+  html,body{height:100%}
   body{
-    display:grid;place-items:center;
+    margin:0;min-height:100vh;display:grid;place-items:center;
     background:linear-gradient(180deg,#eef1f4,#e1e6eb);
-    font:15px/1.5 var(--fonte);color:var(--azul-900);
+    font:15px/1.5 var(--fonte);color:var(--azul-900);-webkit-text-size-adjust:100%;
   }
-  body.modo-app{
-    display:flex; flex-direction:column; width:100vw; height:100vh; overflow:hidden; background:var(--cinza-100);
-  }
+  body.modo-app{display:block;height:100vh;overflow:hidden;background:var(--cinza-100)}
   p{margin:0 0 12px}
-  h1{margin:0;font-size:20px}
+  h1{margin:0;font-size:20px;letter-spacing:-.2px}
   h2{margin:0;font-size:16px}
   a{color:var(--azul-700)}
-  
+  :focus-visible{outline:2px solid var(--azul-700);outline-offset:2px}
+  .oculto-visual{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ---------- Estrutura ---------- */
   .tela{width:100%;padding:24px 16px;display:grid;place-items:center}
-  .tela-app{padding:0;display:flex;flex-direction:column;width:100%;height:100%;flex:1;overflow:hidden;}
-  
+  .tela-app{padding:0;display:flex;flex-direction:column;height:100vh;place-items:stretch}
   .cartao{
     width:min(430px,100%);background:#fff;border:1px solid var(--cinza-300);
     border-top:4px solid var(--amarelo-500);border-radius:var(--raio);
     padding:26px;box-shadow:var(--sombra)
   }
+  .cartao[aria-busy="true"]{opacity:.75}
   .marca{display:flex;align-items:center;gap:10px;margin-bottom:6px;color:var(--azul-700)}
+  .marca h1{font-size:19px}
   .sub{color:var(--cinza-600);font-size:13.5px;margin:0 0 14px}
-  .rodape{margin:16px 0 0;font-size:11.5px;color:var(--cinza-600);text-align:center}
+  .rodape{margin:16px 0 0;font-size:11.5px;color:var(--cinza-600);text-align:center;line-height:1.7}
+  .rodape a{color:var(--azul-700)}
+  .carregando{font-size:13.5px;color:var(--cinza-600);margin:0}
+  .sem-js{padding:24px;background:#fff;border:1px solid var(--cinza-300);border-radius:var(--raio);max-width:420px}
+
+  /* ---------- Formulários ---------- */
   .rotulo{display:block;font-size:12.5px;font-weight:600;color:var(--cinza-600);margin:0 0 5px}
-  .campo{width:100%;padding:10px 11px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);font:inherit;background:#fff;color:var(--azul-900)}
+  .campo{
+    width:100%;padding:10px 11px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);
+    font:inherit;background:#fff;color:var(--azul-900);transition:var(--transicao)
+  }
+  .campo:hover{border-color:#b6c0c9}
+  .campo:focus{border-color:var(--azul-700);box-shadow:var(--foco);outline:none}
+  .campo-invalido{border-color:var(--vermelho-600);background:var(--vermelho-100)}
   .grupo{margin-bottom:12px}
+  .campo-senha{position:relative}
+  .campo-senha .campo{padding-right:44px}
+  .btn-olho{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    width:32px;height:32px;display:grid;place-items:center;padding:0;
+    background:none;border:0;border-radius:var(--raio-sm);color:var(--cinza-600);cursor:pointer
+  }
+  .btn-olho:hover{background:var(--cinza-100);color:var(--azul-700)}
+  .dica{font-size:11.5px;color:var(--cinza-600);margin:6px 0 0}
+  .regras{list-style:none;margin:8px 0 0;padding:0;font-size:11.5px;color:var(--cinza-600)}
+  .regras li{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+  .regras li.ok{color:var(--verde-700)}
+  .aceite{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--cinza-600);margin:14px 0 4px}
+  .aceite input{margin:2px 0 0;width:16px;height:16px;flex:none}
+
+  /* ---------- Botões ---------- */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
     padding:11px 14px;border:1px solid transparent;border-radius:var(--raio-sm);
-    font:600 14.5px/1.2 var(--fonte);cursor:pointer;width:100%;margin-top:8px;text-decoration:none
+    font:600 14.5px/1.2 var(--fonte);cursor:pointer;transition:var(--transicao);
+    white-space:nowrap;text-decoration:none
   }
+  .btn:disabled{opacity:.62;cursor:not-allowed}
+  .btn:not(:disabled):active{transform:translateY(1px)}
+  .btn-bloco{width:100%;margin-top:8px}
   .btn-primario{background:var(--azul-700);color:#fff}
+  .btn-primario:not(:disabled):hover{background:var(--azul-900)}
   .btn-destaque{background:var(--amarelo-500);color:var(--azul-900)}
+  .btn-destaque:not(:disabled):hover{background:#dfa000}
   .btn-pix{background:var(--verde-700);color:#fff}
+  .btn-pix:not(:disabled):hover{background:var(--verde-900)}
+  .btn-perigo{background:var(--vermelho-600);color:#fff}
+  .btn-perigo:not(:disabled):hover{background:#8f1d17}
   .btn-fantasma{background:#fff;border-color:var(--cinza-300);color:var(--azul-700)}
+  .btn-fantasma:not(:disabled):hover{background:var(--cinza-50);border-color:#b6c0c9}
   .btn-limpo{background:none;color:var(--cinza-600)}
+  .btn-limpo:not(:disabled):hover{color:var(--azul-700);background:var(--cinza-100)}
+  .btn-xs{padding:5px 10px;font-size:12.5px;gap:6px}
+  .btn-olho:focus-visible{outline:2px solid var(--azul-700);outline-offset:1px}
+
+  /* ---------- Avisos internos e toasts ---------- */
   .nota{margin:0 0 12px;font-size:13px;border-radius:var(--raio-sm);padding:0}
   .nota:empty{display:none}
+  .nota-ok{background:#eaf7f4;color:var(--verde-900);border:1px solid #b7e5db;padding:9px 11px}
   .nota-erro{background:var(--vermelho-100);color:#7d1a15;border:1px solid #f2c6c2;padding:9px 11px}
-  .fundo-dialogo{position:fixed;inset:0;background:rgba(15,22,29,.62);display:flex;align-items:center;justify-content:center;padding:16px;z-index:99}
-  .dialogo{background:#fff;border-radius:var(--raio);width:min(460px,100%);padding:20px;box-shadow:var(--sombra);border-top:4px solid var(--amarelo-500)}
-  .preco{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
-  .preco b{font-size:24px}
-  
-  .barra{
-    display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:10px 16px;
-    background:var(--azul-800);color:#fff;font-size:13px;border-bottom:2px solid var(--amarelo-500);
-    width:100%;flex-shrink:0;
+  .nota-info{background:#fff8e6;color:var(--amarelo-900);border:1px solid #f5e0a8;padding:9px 11px}
+  .avisos{position:fixed;top:12px;right:12px;z-index:60;display:flex;flex-direction:column;gap:8px;width:min(360px,calc(100vw - 24px))}
+  .aviso{
+    display:flex;gap:9px;align-items:flex-start;background:#fff;border:1px solid var(--cinza-300);
+    border-left:4px solid var(--azul-700);border-radius:var(--raio-sm);padding:10px 12px;
+    font-size:13px;box-shadow:var(--sombra);animation:entraAviso .2s ease-out
   }
-  .quadro{flex:1 1 auto;width:100%;height:100%;background:#fff;overflow:hidden;}
+  .aviso-erro{border-left-color:var(--vermelho-600)}
+  .aviso-ok{border-left-color:var(--verde-700)}
+  .aviso-info{border-left-color:var(--amarelo-500)}
+  .aviso svg{flex:none;margin-top:1px}
+  .aviso.sai{opacity:0;transform:translateX(8px);transition:var(--transicao)}
+  @keyframes entraAviso{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+  /* ---------- Diálogos ---------- */
+  .camada{position:relative;z-index:70}
+  .fundo-dialogo{
+    position:fixed;inset:0;background:rgba(15,22,29,.62);display:flex;align-items:center;
+    justify-content:center;padding:16px;overflow:auto;animation:entraFundo .15s ease-out
+  }
+  .dialogo{
+    background:#fff;border-radius:var(--raio);width:min(460px,100%);max-height:92vh;overflow:auto;
+    box-shadow:var(--sombra-forte);border-top:4px solid var(--amarelo-500)
+  }
+  .dialogo-topo{display:flex;align-items:flex-start;gap:12px;padding:16px 16px 8px}
+  .dialogo-topo h2{flex:1;padding-top:3px}
+  .dialogo-corpo{padding:4px 16px 0;font-size:13.5px}
+  .dialogo-acoes{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px 16px}
+  .dialogo-acoes .btn{flex:1 1 auto;margin-top:0}
+  .btn-icone{
+    width:32px;height:32px;flex:none;display:grid;place-items:center;padding:0;border:0;
+    background:var(--cinza-100);border-radius:var(--raio-sm);color:var(--cinza-600);cursor:pointer;transition:var(--transicao)
+  }
+  .btn-icone:hover{background:var(--cinza-200);color:var(--azul-900)}
+  @keyframes entraFundo{from{opacity:0}to{opacity:1}}
+  .lista-acoes{list-style:none;margin:0;padding:0}
+  .lista-acoes li+li{border-top:1px solid var(--cinza-200)}
+  .item-acao{
+    display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;padding:12px 4px;
+    background:none;border:0;font:inherit;color:var(--azul-900);cursor:pointer;transition:var(--transicao)
+  }
+  .item-acao:hover{background:var(--cinza-50)}
+  .item-acao svg{flex:none;margin-top:2px;color:var(--azul-600)}
+  .item-acao b{display:block;font-size:13.5px;font-weight:600}
+  .item-acao span{display:block;font-size:12px;color:var(--cinza-600)}
+  .item-acao.perigo{color:var(--vermelho-600)}
+  .item-acao.perigo svg{color:var(--vermelho-600)}
+  .item-acao.perigo span{color:#8a4a45}
+
+  /* ---------- Situação da assinatura ---------- */
+  .situacao{display:flex;gap:10px;align-items:flex-start;border-radius:var(--raio-sm);padding:11px 12px;margin-bottom:14px;font-size:13px}
+  .situacao b{display:block;font-size:13.5px;margin-bottom:2px}
+  .situacao p{margin:0}
+  .situacao-ok{background:#eaf7f4;color:var(--verde-900);border:1px solid #b7e5db}
+  .situacao-aviso{background:#fff8e6;color:var(--amarelo-900);border:1px solid #f5e0a8}
+  .situacao-erro{background:var(--vermelho-100);color:#7d1a15;border:1px solid #f2c6c2}
+  .situacao-neutra{background:var(--cinza-100);color:var(--azul-800);border:1px solid var(--cinza-300)}
+  .preco{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
+  .preco b{font-size:24px;letter-spacing:-.4px}
+  .preco span{font-size:12px;color:var(--cinza-600)}
+  .bloco-aviso{display:flex;gap:9px;align-items:flex-start;background:#fff8e6;border:1px solid #f5e0a8;border-radius:var(--raio-sm);padding:10px 12px;color:var(--amarelo-900);font-size:13px}
+  .bloco-aviso p{margin:0}
+  .detalhes{list-style:none;margin:0 0 12px;padding:0;font-size:13px}
+  .detalhes li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--cinza-200)}
+  .detalhes li:last-child{border-bottom:0}
+  .detalhes span{color:var(--cinza-600)}
+
+  /* ---------- PIX ---------- */
+  .pix-rotulo{font-size:12px;color:var(--cinza-600);margin:0 0 2px;text-align:center}
+  .pix-valor{font-size:28px;font-weight:700;letter-spacing:-.5px;margin:0 0 10px;text-align:center}
+  .pix-qr{display:block;margin:0 auto 10px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);padding:6px;background:#fff}
+  .pix-tempo{text-align:center;font-weight:600;color:var(--amarelo-900);font-size:13px;margin:0 0 12px}
+  .pix-tempo.expirou{color:var(--vermelho-600)}
+  .linha-codigo{display:flex;gap:6px;margin-bottom:10px}
+  .linha-codigo .campo{font-size:11.5px;padding:7px 8px;background:var(--cinza-100)}
+  .linha-codigo .btn{flex:none}
+  .aguardando{font-size:12.5px;color:var(--verde-900);background:#eaf7f4;border-radius:var(--raio-sm);padding:8px 10px;margin:0 0 4px;text-align:center}
+
+  /* ---------- Aplicativo (barra + calculadora) ---------- */
+  .barra{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 14px;
+    background:var(--azul-800);color:#c3cdd8;font-size:12.5px;border-bottom:2px solid var(--amarelo-500)
+  }
+  .barra-marca{display:inline-flex;align-items:center;gap:8px;color:#fff;font-size:13px}
+  .barra-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:99px;border:1px solid transparent}
+  .chip-ok{background:rgba(0,177,157,.18);border-color:rgba(0,177,157,.5);color:#8ff0e2}
+  .chip-aviso{background:rgba(242,169,0,.16);border-color:rgba(242,169,0,.55);color:var(--amarelo-300)}
+  .chip-neutro{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.24);color:#dfe6ec}
+  .barra-espaco{flex:1 1 0}
+  .faixa{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 14px;font-size:13px;border-bottom:1px solid var(--cinza-300)}
+  .faixa p{margin:0;flex:1 1 220px}
+  .faixa-aviso{background:#fff8e6;color:var(--amarelo-900)}
+  .faixa-info{background:#eaf7f4;color:var(--verde-900)}
+  .faixa-urgente{background:var(--vermelho-100);color:#7d1a15}
+  .quadro{flex:1 1 auto;min-height:0;background:#fff}
   .quadro iframe{display:block;width:100%;height:100%;border:0}
+
+  @media(max-width:600px){
+    .tela{padding:16px 12px}
+    .cartao{padding:20px}
+    .campo,.btn{font-size:16px}
+    .btn-bloco{margin-top:10px}
+    .avisos{top:auto;bottom:12px;right:12px;left:12px;width:auto}
+    .barra{font-size:12px;gap:6px 10px;padding:7px 10px}
+    .barra-marca{font-size:12.5px}
+    .faixa{font-size:12.5px}
+    .dialogo-acoes .btn{flex:1 1 100%}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<div id="avisos" class="avisos" role="status" aria-live="polite" aria-atomic="true"></div>
+<noscript><div class="sem-js">Este portal precisa de JavaScript habilitado no navegador.</div></noscript>
 <main id="tela" class="tela">
-  <section class="cartao" id="cartao"><p>Carregando o portal…</p></section>
+  <section class="cartao" id="cartao" aria-busy="true"><p class="carregando" role="status">Carregando o portal…</p></section>
 </main>
+<div id="camada" class="camada"></div>
 
 <script>
+/* =========================================================================
+   Portal de acesso · Calculadora de Caldeiraria
+   Arquivo único. Mesma base de dados e mesmas funções do portal anterior.
+   Ajuste tudo pelo bloco CONFIG abaixo.
+   ========================================================================= */
 const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
-  versao: "1.5.5",
-  funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" }
+
+  versao: "1.4.0",
+  termosVersao: "2026-10-22",
+
+  // Funções já existentes na base atual (não renomeadas).
+  funcoes: { pagamento: "criar-assinatura", conta: "deletar-conta" },
+  // Funções novas do ajuste de backend (AJUSTE-BACKEND.md). Se ainda não estiverem
+  // publicadas, o portal continua funcionando como antes.
+  funcoesNovas: { acesso: "acesso-app", gerenciar: "gerenciar-assinatura" },
+
+  // Validade padrão do PIX usada só quando o servidor não informa a expiração.
+  expiracaoPixSegundos: 300,
+
+  // Isola o conteúdo da calculadora: ele perde acesso à sessão, aos dados de login
+  // e ao armazenamento do portal. Se a sua calculadora usar armazenamento local do
+  // navegador, mude para false (a proteção do conteúdo continua valendo).
+  isolarConteudo: true,
+
+  // Registro de eventos do funil. Depende da tabela "eventos" do ajuste de backend.
+  analitica: true,
+
+  // Preencha para liberar os botões de suporte (deixe vazio para ocultar).
+  suporteWhatsapp: "",   // exemplo: "5511999998888"
+  suporteEmail: "",      // exemplo: "suporte@suaempresa.com.br"
+
+  ajuda: [
+    { q: "Como uso a calculadora?", a: "Digite as medidas no formulário e use o botão de calcular. O resultado pode ser impresso ou salvo no seu computador." },
+    { q: "Como faço para assinar?", a: "Escolha cartão ou PIX na tela de assinatura. No cartão você é levado para o ambiente seguro de pagamento; no PIX, escaneie o código e a liberação é automática." },
+    { q: "Esqueci minha senha. E agora?", a: "Na tela de entrada use \"Esqueci minha senha\" e envie o link para o seu e-mail. O link abre o portal já para você definir uma senha nova." },
+    { q: "Como cancelo a assinatura?", a: "No botão Conta, escolha Cancelar assinatura. Você continua com acesso até a data já paga e não há nova cobrança." }
+  ]
 };
 
-const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey);
-const $ = (id) => document.getElementById(id);
-const esc = (t) => String(t || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const brl = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const SUPABASE_URL = CFG.supabaseUrl;
+const SUPABASE_ANON_KEY = CFG.supabaseAnonKey;
+const SANDBOX_CONTEUDO = CFG.isolarConteudo
+  ? "allow-scripts allow-forms allow-modals allow-popups"
+  : "allow-scripts allow-forms allow-modals allow-popups allow-same-origin";
+const ORIGEM_CONTEUDO = CFG.isolarConteudo ? "*" : location.origin;
+const URL_RETORNO = location.origin + location.pathname;
 
-function mostrarCartao(html) {
-  document.body.classList.remove("modo-app");
-  $("cartao").innerHTML = html;
+/* ---------------------------- utilidades ---------------------------- */
+const $ = function (id) { return document.getElementById(id); };
+const esc = function (t) {
+  return String(t === null || t === undefined ? "" : t).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+};
+const brl = function (v) { return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); };
+const fmtData = function (d) {
+  if (!d) return "—";
+  const t = new Date(d);
+  return isNaN(t.getTime()) ? "—" : t.toLocaleDateString("pt-BR");
+};
+const plural = function (n, s) { return n + " " + s + (n === 1 ? "" : "s"); };
+
+const ICONES = {
+  escudo: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11.5 14.5 16 10"/>',
+  olho: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  olhoFechado: '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>',
+  copiar: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  alerta: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  ok: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  usuario: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  ajuda: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  suporte: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+  baixar: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  lixeira: '<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+  cartao: '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+  pix: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M19 19h2v2h-2z"/>',
+  sair: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  arquivo: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/>',
+  externo: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
+  calendario: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  email: '<rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/>',
+  cadeado: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  semRede: '<line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+  atualizar: '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  dinheiro: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>'
+};
+function ico(nome, tam) {
+  const g = ICONES[nome] || ICONES.info;
+  return '<svg width="' + (tam || 18) + '" height="' + (tam || 18) + '" viewBox="0 0 24 24" fill="none" ' +
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + g + "</svg>";
 }
 
-function telaLogin() {
-  mostrarCartao(
-    '<div class="marca"><h1>Orçamento de Caldeiraria</h1></div>' +
-    '<p class="sub">Entre na sua conta para continuar.</p>' +
-    '<div id="nota" class="nota"></div>' +
-    '<form id="form-login">' +
-      '<div class="grupo"><label class="rotulo">E-mail</label><input class="campo" id="email" type="email" required></div>' +
-      '<div class="grupo"><label class="rotulo">Senha</label><input class="campo" id="senha" type="password" required></div>' +
-      '<button type="submit" class="btn btn-primario">Entrar</button>' +
-    '</form>'
-  );
+const sb = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
-  $("form-login").onsubmit = async (e) => {
+/* ---------------------------- estado ---------------------------- */
+let acessoAtual = null;      // última verificação de acesso
+let modoRecuperacao = /type=recovery/.test(location.hash) || /type=recovery/.test(location.search);
+let intervaloTimerPix = null, intervaloConsultaPix = null, intervaloVersao = null;
+let acaoContaAtual = null;   // guarda o "Conta" aberto para dialogo seguinte
+
+/* ---------------------------- avisos ---------------------------- */
+function notificar(texto, tipo) {
+  tipo = tipo || "info";
+  const nota = $("nota");
+  if (nota) {
+    nota.className = "nota nota-" + tipo;
+    nota.textContent = texto;
+  }
+  const container = $("avisos");
+  if (!container) return;
+  const el = document.createElement("div");
+  el.className = "aviso aviso-" + tipo;
+  el.setAttribute("role", tipo === "erro" ? "alert" : "status");
+  el.innerHTML = ico(tipo === "erro" ? "alerta" : (tipo === "ok" ? "ok" : "info"), 18) + "<span>" + esc(texto) + "</span>";
+  container.appendChild(el);
+  setTimeout(function () { el.classList.add("sai"); }, 5600);
+  setTimeout(function () { el.remove(); }, 6200);
+}
+function limparNota() { const n = $("nota"); if (n) { n.className = "nota"; n.textContent = ""; } }
+
+/* ------------------- erros, estados de botão ------------------- */
+function textoErro(err) {
+  const m = (err && (err.message || err.error_description || err.msg || err.error)) || "";
+  const s = String(m).toLowerCase();
+  if (/failed to fetch|networkerror|load failed|network request failed/.test(s)) return "Sem conexão com o servidor. Verifique sua internet e tente novamente.";
+  if (/email not confirmed|not confirmed/.test(s)) return "Seu e-mail ainda não foi confirmado.";
+  if (/invalid login credentials|invalid credentials/.test(s)) return "E-mail ou senha incorretos.";
+  if (/rate limit|too many|security purposes|after \d+ seconds/.test(s)) return "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.";
+  if (/already registered|already exists|user already/.test(s)) return "Este e-mail já está cadastrado. Tente entrar ou recuperar a senha.";
+  if (/weak password|password should be|at least 6|at least 8/.test(s)) return "A senha não atende aos requisitos mínimos de segurança.";
+  if (/user not found/.test(s)) return "Não encontramos uma conta com este e-mail.";
+  if (/same password/.test(s)) return "A nova senha precisa ser diferente da anterior.";
+  if (/invalid.*token|expired|otp_expired/.test(s)) return "Este link expirou ou já foi usado. Peça um novo link.";
+  if (/not found|failed to send a request/.test(s)) return "Recurso indisponível no momento.";
+  return m || "Não foi possível concluir a operação. Tente novamente.";
+}
+function ehErroDeRede(err) {
+  const m = String((err && (err.message || err.error_description)) || "");
+  return /failed to fetch|networkerror|load failed|network request failed/i.test(m);
+}
+function ehIndisponivel(err) {
+  if (!err) return false;
+  const status = (err.context && err.context.status) || err.status;
+  if (status === 404 || status === 501) return true;
+  return /não encontrad|not found/i.test(String(err.message || ""));
+}
+function travar(botao, texto) {
+  if (!botao) return;
+  if (!botao.dataset.rotulo) botao.dataset.rotulo = (botao.textContent || "").trim();
+  botao.disabled = true;
+  botao.innerHTML = '<span class="carregando" role="status">' + esc(texto || "Aguarde…") + "</span>";
+}
+function liberar(botao, rotulo) {
+  if (!botao) return;
+  botao.disabled = false;
+  botao.textContent = rotulo || botao.dataset.rotulo || "Continuar";
+}
+function marcarInvalido(campo) {
+  if (!campo) return;
+  campo.classList.add("campo-invalido");
+  campo.setAttribute("aria-invalid", "true");
+  if (campo.focus) campo.focus();
+  campo.addEventListener("input", function aoDigitar() {
+    campo.classList.remove("campo-invalido");
+    campo.removeAttribute("aria-invalid");
+    campo.removeEventListener("input", aoDigitar);
+  });
+}
+
+/* ---------------------------- diálogos ---------------------------- */
+function focaveis(raiz) {
+  const lista = raiz.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])');
+  return Array.prototype.filter.call(lista, function (e) {
+    return e.offsetWidth > 0 || e.offsetHeight > 0 || e === document.activeElement;
+  });
+}
+function abrirDialogo(opt) {
+  const camada = $("camada");
+  const fundo = document.createElement("div");
+  fundo.className = "fundo-dialogo";
+  const idTitulo = "dlg-" + Math.random().toString(36).slice(2, 8);
+  fundo.innerHTML =
+    '<div class="dialogo" role="dialog" aria-modal="true" aria-labelledby="' + idTitulo + '">' +
+      '<div class="dialogo-topo"><h2 id="' + idTitulo + '">' + esc(opt.titulo) + "</h2>" +
+        '<button type="button" class="btn-icone" data-fechar aria-label="Fechar">' + ico("x", 18) + "</button></div>" +
+      '<div class="dialogo-corpo">' + (opt.conteudo || "") + "</div>" +
+      '<div class="dialogo-acoes"></div>' +
+    "</div>";
+  const caixa = fundo.querySelector(".dialogo");
+  const areaAcoes = fundo.querySelector(".dialogo-acoes");
+  const ultimoFoco = document.activeElement;
+
+  const fechar = function () {
+    if (!fundo.isConnected) return;
+    if (opt.aoFechar) opt.aoFechar();
+    fundo.remove();
+    if (ultimoFoco && ultimoFoco.isConnected && ultimoFoco.focus) {
+      try { ultimoFoco.focus(); } catch (e) {}
+    }
+  };
+  (opt.acoes || []).forEach(function (a) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "btn " + (a.variante || "btn-primario");
+    b.innerHTML = (a.icone ? ico(a.icone, 17) : "") + esc(a.rotulo);
+    b.onclick = function () { if (a.aoClicar) a.aoClicar({ fechar: fechar, botao: b }); };
+    areaAcoes.appendChild(b);
+  });
+  if (!(opt.acoes || []).length) areaAcoes.remove();
+
+  fundo.querySelectorAll("[data-fechar]").forEach(function (b) { b.onclick = fechar; });
+  fundo.addEventListener("mousedown", function (e) {
+    if (e.target === fundo && opt.fecharAoClicarFora !== false) fechar();
+  });
+  fundo.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && opt.fecharComEsc !== false) { e.preventDefault(); fechar(); return; }
+    if (e.key === "Tab") {
+      const f = focaveis(caixa);
+      if (!f.length) return;
+      const primeiro = f[0], ultimo = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo.focus(); }
+      else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
+    }
+  });
+
+  camada.appendChild(fundo);
+  const f = focaveis(caixa);
+  (f[0] || caixa).focus();
+  return { fechar: fechar, caixa: caixa, fundo: fundo };
+}
+function confirmar(opt) {
+  return new Promise(function (resolve) {
+    let resposta = false;
+    abrirDialogo({
+      titulo: opt.titulo,
+      conteudo: '<p>' + (opt.texto || "") + "</p>",
+      acoes: [
+        { rotulo: opt.rotuloCancelar || "Cancelar", variante: "btn-fantasma", aoClicar: function (d) { d.fechar(); } },
+        { rotulo: opt.rotuloOk || "Confirmar", variante: opt.perigoso ? "btn-perigo" : "btn-primario",
+          aoClicar: function (d) { resposta = true; d.fechar(); } }
+      ],
+      aoFechar: function () { resolve(resposta); }
+    });
+  });
+}
+function baixarJson(nome, objeto) {
+  const blob = new Blob([JSON.stringify(objeto, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = nome; document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+
+/* ---------------------------- analítica ---------------------------- */
+async function track(evento, dados) {
+  if (!CFG.analitica) return;
+  try {
+    let uid = null;
+    const s = await sb.auth.getSession();
+    if (s && s.data && s.data.session) uid = s.data.session.user.id;
+    await sb.from("eventos").insert({
+      evento: evento,
+      dados: dados || {},
+      user_id: uid,
+      portal_versao: CFG.versao,
+      criado_em: new Date().toISOString()
+    });
+  } catch (e) { /* tabela ainda não instalada: segue sem travar nada */ }
+}
+
+/* ---------------------------- sessão ---------------------------- */
+async function obterSessao() {
+  try {
+    const { data } = await sb.auth.getSession();
+    return (data && data.session) || null;
+  } catch (e) { return null; }
+}
+function marcarForaDoApp() {
+  document.body.classList.remove("modo-app");
+  const tela = $("tela");
+  if (tela) tela.className = "tela";
+}
+function limparTimers() {
+  [intervaloTimerPix, intervaloConsultaPix, intervaloVersao].forEach(function (i) { if (i) clearInterval(i); });
+  intervaloTimerPix = null; intervaloConsultaPix = null; intervaloVersao = null;
+}
+
+/* ---------------------------- telas ---------------------------- */
+function mostrarCartao(html) {
+  marcarForaDoApp();
+  const cartao = $("cartao");
+  cartao.setAttribute("aria-busy", "false");
+  cartao.innerHTML = html;
+}
+function ligarOlhos() {
+  document.querySelectorAll(".btn-olho").forEach(function (b) {
+    b.onclick = function () {
+      const campo = $(b.dataset.alvo);
+      if (!campo) return;
+      const mostrar = campo.type === "password";
+      campo.type = mostrar ? "text" : "password";
+      b.innerHTML = ico(mostrar ? "olhoFechado" : "olho", 20);
+      b.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+      campo.focus();
+    };
+  });
+}
+function rodapeLinks() {
+  return '<p class="rodape">Portal v' + esc(CFG.versao) + ' · <a href="termos.html" target="_blank" rel="noopener">Termos de Uso</a> · <a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a></p>';
+}
+function campoSenha(id, rotulo, autocomplete) {
+  return '<div class="grupo"><label class="rotulo" for="' + id + '">' + rotulo + "</label>" +
+    '<div class="campo-senha"><input class="campo" id="' + id + '" type="password" autocomplete="' + autocomplete + '" required>' +
+    '<button type="button" class="btn-olho" data-alvo="' + id + '" aria-label="Mostrar senha">' + ico("olho", 20) + "</button></div></div>";
+}
+function checklistSenha(idLista) {
+  return '<ul class="regras" id="' + idLista + '"><li data-regra="tamanho">' + ico("x", 13) + "Pelo menos 8 caracteres</li>" +
+    '<li data-regra="variedade">' + ico("x", 13) + "Letras e números</li></ul>";
+}
+function atualizarChecklist(idLista, senha) {
+  const lista = $(idLista);
+  if (!lista) return;
+  const regras = { tamanho: senha.length >= 8, variedade: /[A-Za-z]/.test(senha) && /[0-9]/.test(senha) };
+  Object.keys(regras).forEach(function (chave) {
+    const li = lista.querySelector('[data-regra="' + chave + '"]');
+    if (!li) return;
+    li.className = regras[chave] ? "ok" : "";
+    li.innerHTML = ico(regras[chave] ? "ok" : "x", 13) + li.textContent;
+  });
+}
+
+/* ---------- login ---------- */
+function telaLogin(mensagemInicial) {
+  limparTimers();
+  mostrarCartao(
+    '<div class="marca">' + ico("escudo", 22) + "<h1>Orçamento de Caldeiraria</h1></div>" +
+    '<p class="sub">Entre com sua conta para acessar a calculadora.</p>' +
+    '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+    '<form id="f-login" novalidate>' +
+      '<div class="grupo"><label class="rotulo" for="email">E-mail</label>' +
+      '<input class="campo" id="email" name="email" type="email" autocomplete="username" inputmode="email" required></div>' +
+      campoSenha("senha", "Senha", "current-password") +
+      '<button class="btn btn-primario btn-bloco" id="b-entrar" type="submit">' + ico("cadeado", 17) + "Entrar</button>" +
+      '<button class="btn btn-fantasma btn-bloco" id="b-cadastro" type="button">Criar minha conta</button>' +
+      '<button class="btn btn-limpo btn-bloco" id="b-esqueci" type="button">Esqueci minha senha</button>' +
+    "</form>" + rodapeLinks()
+  );
+  ligarOlhos();
+  $("f-login").onsubmit = async function (e) {
     e.preventDefault();
+    limparNota();
+    const email = $("email").value.trim().toLowerCase();
+    const senha = $("senha").value;
+    if (!email || !senha) return notificar("Preencha e-mail e senha.", "erro");
+    const botao = $("b-entrar");
+    travar(botao, "Entrando…");
     try {
-      const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("senha").value });
-      if (error) throw error;
-      carregarPortal();
+      const { error } = await sb.auth.signInWithPassword({ email: email, password: senha });
+      if (error) {
+        const texto = textoErro(error);
+        if (/não foi confirmado/.test(texto)) return telaConfirmarEmail(email, "Confirme seu e-mail para entrar.");
+        notificar(texto, "erro");
+        marcarInvalido($("senha"));
+        return liberar(botao, "Entrar");
+      }
+      await track("login", {});
+      await abrir();
     } catch (err) {
-      $("nota").className = "nota nota-erro";
-      $("nota").textContent = err.message || "Erro ao entrar.";
+      notificar(textoErro(err), "erro");
+      liberar(botao, "Entrar");
+    }
+  };
+  $("b-cadastro").onclick = function () { telaCadastro($("email").value.trim()); };
+  $("b-esqueci").onclick = function () { telaRecuperar($("email").value.trim()); };
+  if (mensagemInicial) notificar(mensagemInicial, "info");
+}
+
+/* ---------- criar conta ---------- */
+function telaCadastro(emailSugerido) {
+  mostrarCartao(
+    '<div class="marca">' + ico("escudo", 22) + "<h1>Criar minha conta</h1></div>" +
+    '<p class="sub">Preencha os dados e clique uma única vez para criar a conta.</p>' +
+    '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+    '<form id="f-cadastro" novalidate>' +
+      '<div class="grupo"><label class="rotulo" for="email">E-mail</label>' +
+      '<input class="campo" id="email" type="email" autocomplete="username" inputmode="email" required></div>' +
+      campoSenha("senha", "Senha", "new-password") + checklistSenha("regras") +
+      campoSenha("senha2", "Confirme a senha", "new-password") +
+      '<label class="aceite"><input type="checkbox" id="aceite">' +
+        '<span>Li e aceito os <a href="termos.html" target="_blank" rel="noopener">Termos de Uso</a> e a ' +
+        '<a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>' +
+      '<button class="btn btn-destaque btn-bloco" id="b-criar" type="submit">Criar minha conta</button>' +
+      '<button class="btn btn-limpo btn-bloco" id="b-voltar" type="button">Voltar para a entrada</button>' +
+    "</form>" + rodapeLinks()
+  );
+  ligarOlhos();
+  if (emailSugerido) $("email").value = emailSugerido;
+  $("senha").addEventListener("input", function () { atualizarChecklist("regras", $("senha").value); });
+
+  $("f-cadastro").onsubmit = async function (e) {
+    e.preventDefault();
+    limparNota();
+    const email = $("email").value.trim().toLowerCase();
+    const senha = $("senha").value;
+    const senha2 = $("senha2").value;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { notificar("Digite um e-mail válido.", "erro"); return marcarInvalido($("email")); }
+    if (senha.length < 8) { notificar("A senha precisa ter pelo menos 8 caracteres.", "erro"); return marcarInvalido($("senha")); }
+    if (senha !== senha2) { notificar("As senhas não coincidem.", "erro"); return marcarInvalido($("senha2")); }
+    if (!$("aceite").checked) { notificar("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.", "erro"); return; }
+
+    const botao = $("b-criar");
+    travar(botao, "Criando sua conta…");
+    try {
+      const { data, error } = await sb.auth.signUp({
+        email: email,
+        password: senha,
+        options: {
+          emailRedirectTo: URL_RETORNO,
+          data: { aceite_termos: CFG.termosVersao, aceite_em: new Date().toISOString() }
+        }
+      });
+      if (error) { notificar(textoErro(error), "erro"); return liberar(botao, "Criar minha conta"); }
+
+      const sessao = data && data.session;
+      if (sessao) {
+        registrarConsentimento(sessao.user.id);
+        await track("conta_criada", { confirmacao_automatica: true });
+        await abrir();
+        return notificar("Conta criada com sucesso. Bem-vindo!", "ok");
+      }
+      await track("conta_criada", { confirmacao_automatica: false });
+      telaConfirmarEmail(email, "Enviamos um link de confirmação para o seu e-mail.");
+    } catch (err) {
+      notificar(textoErro(err), "erro");
+      liberar(botao, "Criar minha conta");
+    }
+  };
+  $("b-voltar").onclick = function () { telaLogin(); };
+}
+async function registrarConsentimento(userId) {
+  try {
+    await sb.from("consentimentos").insert({
+      user_id: userId, termo: "termos+privacidade", versao: CFG.termosVersao, aceito_em: new Date().toISOString()
+    });
+  } catch (e) { /* tabela opcional */ }
+}
+
+/* ---------- confirmar e-mail ---------- */
+function telaConfirmarEmail(email, mensagem) {
+  mostrarCartao(
+    '<div class="marca">' + ico("email", 22) + "<h1>Confirme seu e-mail</h1></div>" +
+    '<p class="sub">' + esc(mensagem || "Precisamos confirmar seu e-mail para liberar o acesso.") + "</p>" +
+    '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+    '<p class="sub">Enviado para <b>' + esc(email) + "</b>. Verifique também a caixa de spam.</p>" +
+    '<button class="btn btn-primario btn-bloco" id="b-reenviar" type="button">Reenviar e-mail de confirmação</button>' +
+    '<button class="btn btn-fantasma btn-bloco" id="b-ir-login" type="button">Já confirmei, quero entrar</button>' +
+    '<button class="btn btn-limpo btn-bloco" id="b-trocar" type="button">Usar outro e-mail</button>' + rodapeLinks()
+  );
+  $("b-reenviar").onclick = async function () {
+    const botao = $("b-reenviar");
+    travar(botao, "Reenviando…");
+    try {
+      const { error } = await sb.auth.resend({ type: "signup", email: email, options: { emailRedirectTo: URL_RETORNO } });
+      liberar(botao, "Reenviar e-mail de confirmação");
+      error ? notificar(textoErro(error), "erro") : notificar("Reenviamos o e-mail de confirmação.", "ok");
+    } catch (err) {
+      liberar(botao, "Reenviar e-mail de confirmação");
+      notificar(textoErro(err), "erro");
+    }
+  };
+  $("b-ir-login").onclick = function () { telaLogin("Depois de confirmar o e-mail, entre normalmente."); };
+  $("b-trocar").onclick = function () { telaCadastro(""); };
+}
+
+/* ---------- esqueci minha senha ---------- */
+function telaRecuperar(emailSugerido) {
+  mostrarCartao(
+    '<div class="marca">' + ico("cadeado", 22) + "<h1>Recuperar acesso</h1></div>" +
+    '<p class="sub">Informe seu e-mail e enviaremos um link para você definir uma senha nova.</p>' +
+    '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+    '<form id="f-recuperar" novalidate><div class="grupo">' +
+      '<label class="rotulo" for="email">E-mail</label>' +
+      '<input class="campo" id="email" type="email" autocomplete="username" inputmode="email" required></div>' +
+      '<button class="btn btn-primario btn-bloco" id="b-enviar" type="submit">Enviar link de redefinição</button>' +
+      '<button class="btn btn-limpo btn-bloco" id="b-voltar" type="button">Voltar para a entrada</button>' +
+    "</form>" + rodapeLinks()
+  );
+  if (emailSugerido) $("email").value = emailSugerido;
+  $("f-recuperar").onsubmit = async function (e) {
+    e.preventDefault();
+    limparNota();
+    const email = $("email").value.trim().toLowerCase();
+    if (!email) { notificar("Digite seu e-mail.", "erro"); return marcarInvalido($("email")); }
+    const botao = $("b-enviar");
+    travar(botao, "Enviando…");
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: URL_RETORNO });
+      liberar(botao, "Enviar link de redefinição");
+      if (error) return notificar(textoErro(error), "erro");
+      await track("recuperacao_solicitada", {});
+      mostrarCartao(
+        '<div class="marca">' + ico("email", 22) + "<h1>Verifique seu e-mail</h1></div>" +
+        '<p class="sub">Se existir uma conta com <b>' + esc(email) + "</b>, o link para criar uma senha nova chegará em instantes.</p>" +
+        '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+        '<p class="sub">O link abre este portal já na tela de nova senha. Se não chegar, veja a caixa de spam.</p>' +
+        '<button class="btn btn-primario btn-bloco" id="b-voltar2" type="button">Voltar para a entrada</button>' + rodapeLinks()
+      );
+      $("b-voltar2").onclick = function () { telaLogin(); };
+    } catch (err) {
+      liberar(botao, "Enviar link de redefinição");
+      notificar(textoErro(err), "erro");
+    }
+  };
+  $("b-voltar").onclick = function () { telaLogin(); };
+}
+
+/* ---------- definir nova senha ---------- */
+async function telaNovaSenha() {
+  let sessao = await obterSessao();
+  if (!sessao) {
+    // O link de recuperação chega pelo endereço; damos alguns instantes para a sessão ser reconhecida.
+    mostrarCartao('<div class="marca">' + ico("cadeado", 22) + "<h1>Validando seu link</h1></div>" +
+      '<p class="sub" role="status">Só um instante enquanto confirmamos o link de recuperação…</p>');
+    for (let tentativa = 0; tentativa < 12 && !sessao; tentativa++) {
+      await new Promise(function (r) { setTimeout(r, 400); });
+      sessao = await obterSessao();
+    }
+  }
+  if (!sessao) {
+    mostrarCartao(
+      '<div class="marca">' + ico("alerta", 22) + "<h1>Link inválido ou expirado</h1></div>" +
+      '<p class="sub">Não conseguimos validar este link de recuperação. Peça um novo para continuar.</p>' +
+      '<button class="btn btn-primario btn-bloco" id="b-novo-link" type="button">Pedir novo link</button>' +
+      '<button class="btn btn-limpo btn-bloco" id="b-voltar" type="button">Voltar para a entrada</button>' + rodapeLinks()
+    );
+    $("b-novo-link").onclick = function () { modoRecuperacao = false; telaRecuperar(""); };
+    $("b-voltar").onclick = function () { modoRecuperacao = false; telaLogin(); };
+    return;
+  }
+  mostrarCartao(
+    '<div class="marca">' + ico("cadeado", 22) + "<h1>Defina sua nova senha</h1></div>" +
+    '<p class="sub">Escolha uma senha nova para acessar o portal.</p>' +
+    '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+    '<form id="f-nova-senha" novalidate>' + campoSenha("senha", "Nova senha", "new-password") + checklistSenha("regras") +
+      campoSenha("senha2", "Confirme a nova senha", "new-password") +
+      '<button class="btn btn-primario btn-bloco" id="b-salvar" type="submit">Salvar nova senha</button>' +
+    "</form>" + rodapeLinks()
+  );
+  ligarOlhos();
+  $("senha").addEventListener("input", function () { atualizarChecklist("regras", $("senha").value); });
+  $("f-nova-senha").onsubmit = async function (e) {
+    e.preventDefault();
+    limparNota();
+    const senha = $("senha").value, senha2 = $("senha2").value;
+    if (senha.length < 8) { notificar("A senha precisa ter pelo menos 8 caracteres.", "erro"); return marcarInvalido($("senha")); }
+    if (senha !== senha2) { notificar("As senhas não coincidem.", "erro"); return marcarInvalido($("senha2")); }
+    const botao = $("b-salvar");
+    travar(botao, "Salvando…");
+    try {
+      const { error } = await sb.auth.updateUser({ password: senha });
+      if (error) { notificar(textoErro(error), "erro"); return liberar(botao, "Salvar nova senha"); }
+      modoRecuperacao = false;
+      try { history.replaceState(null, "", location.pathname); } catch (e) {}
+      await track("senha_redefinida", {});
+      notificar("Senha alterada com sucesso.", "ok");
+      await abrir();
+    } catch (err) {
+      notificar(textoErro(err), "erro");
+      liberar(botao, "Salvar nova senha");
     }
   };
 }
 
-async function telaAssinar(precoSugerido) {
-  let preco = precoSugerido || 49.90;
+/* ---------- erro de conexão ---------- */
+function telaErroConexao(detalhe, tentarNovamente) {
+  mostrarCartao(
+    '<div class="marca">' + ico("semRede", 22) + "<h1>Não conseguimos carregar</h1></div>" +
+    '<p class="sub">' + esc(detalhe || "Verifique sua conexão e tente novamente. Seus dados e sua assinatura continuam salvos.") + "</p>" +
+    '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+    '<button class="btn btn-primario btn-bloco" id="b-tentar" type="button">Tentar novamente</button>' +
+    '<button class="btn btn-fantasma btn-bloco" id="b-suporte" type="button">Falar com o suporte</button>'
+  );
+  $("b-tentar").onclick = function () { tentarNovamente ? tentarNovamente() : location.reload(); };
+  $("b-suporte").onclick = abrirSuporte;
+}
 
-  const render = (p) => {
-    mostrarCartao(
-      '<div class="marca"><h1>Assinatura necessária</h1></div>' +
-      '<p class="sub">Desbloqueie o acesso completo à Calculadora.</p>' +
-      '<div class="preco"><span>Plano Profissional</span><b>' + brl(p) + '<span>/ mês</span></b></div>' +
-      '<button type="button" class="btn btn-destaque" id="btn-cartao">Assinar com Cartão · ' + brl(p) + '/mês</button>' +
-      '<button type="button" class="btn btn-pix" id="btn-pix">Pagar com PIX · ' + brl(p) + '</button>' +
-      '<button type="button" class="btn btn-fantasma" id="btn-verificar">Verificar novamente</button>' +
-      '<button type="button" class="btn btn-limpo" id="btn-sair">Sair da conta</button>'
-    );
+function telaFalhaCarregamento() {
+  mostrarCartao(
+    '<div class="marca">' + ico("alerta", 22) + "<h1>Portal indisponível</h1></div>" +
+    '<p class="sub">Não foi possível carregar os componentes do portal. Verifique sua conexão e recarregue a página.</p>' +
+    '<button class="btn btn-primario btn-bloco" id="b-recarregar" type="button">Recarregar</button>'
+  );
+  $("b-recarregar").onclick = function () { location.reload(); };
+}
 
-    $("btn-cartao").onclick = async () => {
-      try {
-        const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: "cartao" } });
-        if (error) throw error;
-        if (data && data.url) {
-          location.href = data.url;
-        } else {
-          alert("Link de pagamento não retornado.");
-        }
-      } catch (e) {
-        alert("Erro ao redirecionar para o cartão.");
-      }
-    };
+/* ---------------------- acesso e assinatura ---------------------- */
+function situacao(info) {
+  const status = String(info.status || "").toLowerCase();
+  const valid = info.valid_until ? new Date(info.valid_until) : null;
+  const dias = typeof info.dias === "number" ? info.dias : null;
+  const ativo = !!(valid && valid.getTime() > Date.now());
+  const cancelada = /cancel/.test(status);
+  const atraso = /past|atras|inadimpl|late|overdue/.test(status);
+  const recusado = /unpaid|recus|fail|falh|rejected/.test(status);
+  const ate = valid ? fmtData(valid) : "—";
+  const quando = dias === null ? "" : " (" + plural(dias, "dia") + ")";
 
-    $("btn-pix").onclick = async () => {
-      try {
-        const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: "pix" } });
-        if (error) throw error;
-        abrirModalPix(data, p);
-      } catch (e) {
-        alert("Erro ao gerar PIX.");
-      }
-    };
+  if (ativo && cancelada) {
+    return { chave: "aviso", icone: "info", rotulo: "Assinatura cancelada", destaque: true,
+      resumo: "Acesso até " + ate,
+      descricao: "Não haverá nova cobrança. Seu acesso segue liberado até <b>" + ate + "</b>" + quando + "." };
+  }
+  if (ativo && (atraso || recusado)) {
+    return { chave: "aviso", icone: "alerta", rotulo: atraso ? "Pagamento em atraso" : "Pagamento não aprovado", destaque: true,
+      resumo: "Acesso até " + ate,
+      descricao: "Atualize a forma de pagamento para não perder o acesso em <b>" + ate + "</b>" + quando + "." };
+  }
+  if (ativo) {
+    return { chave: "ok", icone: "ok", rotulo: "Assinatura ativa", destaque: dias !== null && dias <= 5,
+      resumo: "Acesso até " + ate + quando,
+      descricao: "Seu acesso está liberado até <b>" + ate + "</b>" + quando + "." };
+  }
+  if (cancelada) {
+    return { chave: "erro", icone: "x", rotulo: "Assinatura cancelada", destaque: true,
+      resumo: "Acesso encerrado",
+      descricao: "A assinatura foi cancelada e o acesso terminou em <b>" + ate + "</b>. Você pode assinar novamente quando quiser." };
+  }
+  if (atraso || recusado) {
+    return { chave: "erro", icone: "alerta", rotulo: atraso ? "Pagamento em atraso" : "Pagamento não aprovado", destaque: true,
+      resumo: "Acesso bloqueado",
+      descricao: "O último pagamento não foi confirmado e o acesso ficou bloqueado. Regularize para voltar a usar a calculadora." };
+  }
+  if (valid) {
+    return { chave: "erro", icone: "x", rotulo: "Assinatura expirada", destaque: true,
+      resumo: "Acesso encerrado",
+      descricao: "Seu acesso terminou em <b>" + ate + "</b>. Assine novamente para voltar a usar a calculadora." };
+  }
+  return { chave: "neutra", icone: "info", rotulo: "Sem assinatura ativa", destaque: false,
+    resumo: "Sem assinatura",
+    descricao: "Escolha uma forma de pagamento para liberar o acesso à calculadora." };
+}
 
-    $("btn-verificar").onclick = () => carregarPortal();
-    $("btn-sair").onclick = async () => { await sb.auth.signOut(); telaLogin(); };
+async function buscarConteudo() {
+  try {
+    const { data, error } = await sb.from("app_conteudo").select("*").eq("id", 1).maybeSingle();
+    if (error || !data) return null;
+    return { html: data.html || null, versao: data.versao || null, atualizado_em: data.atualizado_em || null };
+  } catch (e) { return null; }
+}
+async function buscarVersao() {
+  try {
+    const { data, error } = await sb.from("app_conteudo").select("versao").eq("id", 1).maybeSingle();
+    if (error || !data) return null;
+    return data.versao || null;
+  } catch (e) { return null; }
+}
+async function montarAcesso(base) {
+  const valid = base.valid_until || null;
+  const dias = (typeof base.dias === "number") ? base.dias
+    : (valid ? Math.max(0, Math.ceil((new Date(valid).getTime() - Date.now()) / 86400000)) : null);
+  let conteudo = base.conteudo || { html: null, versao: null };
+  let semConteudo = false;
+  if (base.liberado && !conteudo.html) {
+    const c = await buscarConteudo();
+    if (c && c.html) conteudo = c; else semConteudo = true;
+  }
+  const info = {
+    liberado: !!base.liberado && !semConteudo,
+    semConteudo: semConteudo,
+    origem: base.origem || "local",
+    status: base.status || null,
+    valid_until: valid,
+    ativado_em: base.ativado_em || null,
+    dias: dias,
+    conteudo: conteudo,
+    assinatura_presente: base.assinatura_presente !== false
   };
+  info.situacao = situacao(info);
+  return info;
+}
+async function carregarAcessoLocal() {
+  let assinatura = null, conteudo = null;
+  try {
+    const resposta = await Promise.all([
+      sb.from("assinaturas").select("*").maybeSingle(),
+      sb.from("app_conteudo").select("*").eq("id", 1).maybeSingle()
+    ]);
+    const ra = resposta[0], rc = resposta[1];
+    if (ra.error && ehErroDeRede(ra.error)) return { estado: "erro_rede", detalhe: textoErro(ra.error) };
+    if (rc.error && ehErroDeRede(rc.error)) return { estado: "erro_rede", detalhe: textoErro(rc.error) };
+    if (ra.error) {
+      return { estado: "erro_rede", detalhe: "Não conseguimos verificar sua assinatura agora. Tente novamente; se persistir, fale com o suporte." };
+    }
+    assinatura = ra.data || null;
+    conteudo = rc.data || null;
+  } catch (err) {
+    return { estado: "erro_rede", detalhe: textoErro(err) };
+  }
+  const valid = (assinatura && assinatura.valid_until) || null;
+  const html = (conteudo && conteudo.html) || null;
+  const liberado = !!(html && valid && new Date(valid).getTime() > Date.now());
+  const info = await montarAcesso({
+    liberado: liberado, status: assinatura && assinatura.status, valid_until: valid,
+    ativado_em: assinatura && assinatura.ativado_em, dias: null,
+    conteudo: { html: html, versao: (conteudo && conteudo.versao) || null },
+    origem: "local", assinatura_presente: !!assinatura
+  });
+  return { estado: "ok", info: info };
+}
+async function carregarAcesso() {
+  const sessao = await obterSessao();
+  if (!sessao) return { estado: "sem_sessao" };
+  let falha = null;
+  try {
+    const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.acesso, { body: {} });
+    if (error) falha = error;
+    else if (data && typeof data.liberado === "boolean") {
+      const info = await montarAcesso({
+        liberado: data.liberado,
+        status: data.status,
+        valid_until: data.valid_until,
+        ativado_em: data.ativado_em,
+        dias: (data.dias === null || data.dias === undefined || isNaN(Number(data.dias))) ? null : Number(data.dias),
+        conteudo: { html: data.html || null, versao: data.versao || null },
+        origem: "servidor",
+        assinatura_presente: data.assinatura_presente !== false
+      });
+      return { estado: "ok", info: info };
+    } else {
+      falha = new Error("Resposta inesperada do servidor.");
+    }
+  } catch (err) { falha = err; }
 
-  render(preco);
-
-  sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "obter_preco" } })
-    .then(({ data }) => {
-      if (data && data.preco && Number(data.preco) !== preco) {
-        preco = Number(data.preco);
-        render(preco);
-      }
-    }).catch(() => {});
+  if (falha && ehErroDeRede(falha)) return { estado: "erro_rede", detalhe: textoErro(falha) };
+  // Verificação no servidor ainda não publicada: mantém o comportamento anterior do portal.
+  return carregarAcessoLocal();
 }
 
-function abrirModalPix(dadosPix, precoAtual) {
-  const d = document.createElement("div");
-  d.className = "fundo-dialogo";
-  const qrBase64 = dadosPix.qr_code_base64 || dadosPix.point_of_interaction?.transaction_data?.qr_code_base64 || "";
-  const qrCode = dadosPix.qr_code || dadosPix.point_of_interaction?.transaction_data?.qr_code || "";
-
-  d.innerHTML = '<div class="dialogo" style="text-align:center">' +
-    '<h2>Pagamento via PIX</h2>' +
-    '<p style="font-size:22px;font-weight:bold;margin:10px 0">' + brl(dadosPix.valor || precoAtual) + '</p>' +
-    (qrBase64 ? '<img src="data:image/png;base64,' + qrBase64 + '" width="160" height="160" style="margin:10px 0">' : '<p>Escaneie o código copia e cola</p>') +
-    '<input class="campo" type="text" readonly value="' + esc(qrCode) + '" style="font-size:11px;margin-bottom:10px">' +
-    '<button class="btn btn-primario" id="fechar-pix">Fechar</button>' +
-    '</div>';
-  document.body.appendChild(d);
-  d.querySelector("#fechar-pix").onclick = () => d.remove();
+async function carregarPreco() {
+  try {
+    const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "obter_preco" } });
+    if (error) return { ok: false, detalhe: textoErro(error) };
+    const preco = Number(data && (data.preco || data.valor));
+    if (!(preco > 0)) return { ok: false, detalhe: "Valor não informado pelo servidor." };
+    return { ok: true, preco: preco };
+  } catch (err) {
+    return { ok: false, detalhe: textoErro(err) };
+  }
 }
 
-async function carregarPortal() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { telaLogin(); return; }
+/* ---------- fluxo principal ---------- */
+async function abrir() {
+  limparTimers();
+  marcarForaDoApp();
+  const cartao = $("cartao");
+  cartao.setAttribute("aria-busy", "true");
+  cartao.innerHTML = '<p class="carregando" role="status">Verificando seu acesso…</p>';
+  let r;
+  try {
+    r = await carregarAcesso();
+  } catch (err) {
+    return telaErroConexao(textoErro(err), abrir);
+  }
+  if (r.estado === "sem_sessao") return telaLogin();
+  if (r.estado === "erro_rede") return telaErroConexao(r.detalhe, abrir);
+  acessoAtual = r.info;
+  if (r.info.semConteudo) return telaErroConexao("Não conseguimos carregar a calculadora agora. Tente novamente em instantes.", abrir);
+  if (!r.info.liberado) return telaAssinar(r.info);
+  return telaApp(r.info);
+}
 
-  const { data: ass } = await sb.from("assinaturas").select("valid_until").maybeSingle();
-  if (!ass || !ass.valid_until || new Date(ass.valid_until).getTime() <= Date.now()) {
-    telaAssinar();
+/* ---------- tela de assinatura ---------- */
+async function telaAssinar(info) {
+  const s = info.situacao;
+  limparTimers();
+  await track("assinatura_pendente_vista", { situacao: s.chave });
+  mostrarCartao(
+    '<div class="marca">' + ico("escudo", 22) + "<h1>Sua assinatura</h1></div>" +
+    '<div class="situacao situacao-' + s.chave + '">' + ico(s.icone, 18) +
+      "<div><b>" + esc(s.rotulo) + "</b><p>" + s.descricao + "</p></div></div>" +
+    '<div id="nota" class="nota" role="status" aria-live="polite"></div>' +
+    '<div id="pagamento"><p class="carregando" role="status">Confirmando o valor da assinatura…</p></div>' +
+    '<button class="btn btn-fantasma btn-bloco" id="b-japaguei" type="button">' + ico("atualizar", 17) + "Já paguei: verificar agora</button>" +
+    '<button class="btn btn-limpo btn-bloco" id="b-conta" type="button">Conta, faturas e suporte</button>' + rodapeLinks()
+  );
+  $("b-conta").onclick = function () { abrirConta(info); };
+  $("b-japaguei").onclick = async function (e) {
+    const botao = e.currentTarget;
+    travar(botao, "Verificando…");
+    const r = await carregarAcesso();
+    if (r.estado === "ok" && r.info.liberado) { await track("acesso_liberado_manual", {}); return abrir(); }
+    liberar(botao, "Já paguei: verificar agora");
+    notificar(r.estado === "erro_rede" ? r.detalhe : "Ainda não identificamos um pagamento liberado. Se você acabou de pagar, aguarde alguns instantes.", "erro");
+  };
+  const preco = await carregarPreco();
+  renderPagamento(preco);
+}
+function renderPagamento(preco) {
+  const alvo = $("pagamento");
+  if (!alvo) return;
+  if (!preco.ok) {
+    alvo.innerHTML =
+      '<div class="bloco-aviso">' + ico("alerta", 18) +
+      "<p>Não conseguimos confirmar o valor da assinatura agora, então preferimos não exibir um valor que pode estar desatualizado.</p></div>" +
+      '<button class="btn btn-primario btn-bloco" id="b-recarregar-preco" type="button">Tentar novamente</button>';
+    $("b-recarregar-preco").onclick = async function (e) {
+      const botao = e.currentTarget;
+      travar(botao, "Confirmando…");
+      const p = await carregarPreco();
+      liberar(botao, "Tentar novamente");
+      renderPagamento(p);
+      if (!p.ok) notificar("Ainda sem resposta do servidor. Tente novamente em instantes.", "erro");
+    };
     return;
   }
+  if (acessoAtual) acessoAtual.preco = preco.preco;
+  alvo.innerHTML =
+    '<p class="preco"><b>' + brl(preco.preco) + "/mês</b><span>Renovação mensal. Cancele quando quiser.</span></p>" +
+    '<button class="btn btn-destaque btn-bloco" id="b-cartao" type="button">' + ico("cartao", 18) + "Assinar com cartão</button>" +
+    '<button class="btn btn-pix btn-bloco" id="b-pix" type="button">' + ico("pix", 18) + "Pagar com PIX · " + brl(preco.preco) + "</button>";
+  $("b-cartao").onclick = function (e) { abrirPagamento("cartao", e.currentTarget); };
+  $("b-pix").onclick = function (e) { abrirPagamento("pix", e.currentTarget); };
+}
 
-  let htmlConteudo = "<h1>Erro ao carregar conteúdo da calculadora</h1>";
+/* ---------- pagamento ---------- */
+async function abrirPagamento(metodo, botao) {
+  const rotuloOriginal = botao ? (botao.dataset.rotulo || botao.textContent.trim()) : null;
+  if (botao) travar(botao, metodo === "pix" ? "Gerando o PIX…" : "Iniciando o pagamento…");
   try {
-    const { data } = await sb.from("app_conteudo").select("html").eq("id", 1).maybeSingle();
-    if (data && data.html) htmlConteudo = data.html;
-  } catch (e) {}
+    const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: metodo } });
+    if (error || !data) {
+      if (botao) liberar(botao, rotuloOriginal);
+      return notificar(error ? textoErro(error) : "Não conseguimos iniciar o pagamento. Tente novamente.", "erro");
+    }
+    if (metodo === "cartao") {
+      if (!data.url) { if (botao) liberar(botao, rotuloOriginal); return notificar("Não conseguimos abrir o pagamento com cartão.", "erro"); }
+      await track("pagamento_cartao_iniciado", {});
+      location.href = data.url;
+      return;
+    }
+    if (!data.qr_code || !data.qr_code_base64) {
+      if (botao) liberar(botao, rotuloOriginal);
+      return notificar("Não conseguimos gerar o código PIX. Tente novamente.", "erro");
+    }
+    if (botao) liberar(botao, rotuloOriginal);
+    await track("pix_gerado", {});
+    exibirPix(data);
+  } catch (err) {
+    if (botao) liberar(botao, rotuloOriginal);
+    notificar(textoErro(err), "erro");
+  }
+}
+function normalizarExpiracao(data) {
+  const c = data.expiracao || data.expira_em || data.expiracao_em || data.expires_at;
+  if (c === null || c === undefined) return CFG.expiracaoPixSegundos;
+  if (typeof c === "number") {
+    if (c > 1e12) return Math.max(0, Math.round((c - Date.now()) / 1000));
+    if (c > 1e9 && c < 1e12) return Math.max(0, Math.round(c - Date.now() / 1000));
+    return Math.max(0, Math.round(c));
+  }
+  const t = new Date(c).getTime();
+  if (isNaN(t)) return CFG.expiracaoPixSegundos;
+  return Math.max(0, Math.round((t - Date.now()) / 1000));
+}
+function exibirPix(data) {
+  limparTimers();
+  const valor = Number(data.valor) > 0 ? Number(data.valor) : (acessoAtual && acessoAtual.preco ? acessoAtual.preco : null);
+  let restante = normalizarExpiracao(data);
+  let expirou = false;
 
+  const dialogo = abrirDialogo({
+    titulo: "Pagamento via PIX",
+    fecharAoClicarFora: false,
+    conteudo:
+      '<p class="pix-rotulo">Valor a pagar</p>' +
+      '<p class="pix-valor">' + (valor ? brl(valor) : "conforme o servidor") + "</p>" +
+      '<p class="sub" style="text-align:center">Escaneie o QR Code ou use o código copia e cola.</p>' +
+      '<img class="pix-qr" width="176" height="176" alt="QR Code para pagamento via PIX" src="data:image/png;base64,' + esc(data.qr_code_base64) + '">' +
+      '<p class="pix-tempo" id="pix-tempo" role="timer">Tempo restante: —</p>' +
+      '<label class="rotulo" for="pix-codigo">PIX copia e cola</label>' +
+      '<div class="linha-codigo"><input class="campo" id="pix-codigo" readonly value="' + esc(data.qr_code) + '">' +
+      '<button type="button" class="btn btn-fantasma btn-xs" id="b-copiar">' + ico("copiar", 16) + "Copiar</button></div>" +
+      '<p class="aguardando" id="pix-status" role="status">Aguardando o pagamento. A liberação é automática.</p>',
+    acoes: [
+      { rotulo: "Já paguei, verificar agora", variante: "btn-destaque", aoClicar: function () { consultarPagamento(true); } },
+      { rotulo: "Gerar novo código", variante: "btn-fantasma", aoClicar: function (d) { d.fechar(); abrirPagamento("pix"); } },
+      { rotulo: "Fechar", variante: "btn-limpo", aoClicar: function (d) { d.fechar(); } }
+    ],
+    aoFechar: function () { limparTimers(); }
+  });
+
+  const bCopiar = dialogo.caixa.querySelector("#b-copiar");
+  if (bCopiar) bCopiar.onclick = async function () {
+    const campo = dialogo.caixa.querySelector("#pix-codigo");
+    try { await navigator.clipboard.writeText(campo.value); notificar("Código PIX copiado.", "ok"); }
+    catch (e) { campo.select(); notificar("Selecionamos o código. Copie com Ctrl+C.", "info"); }
+  };
+
+  function pintarTempo() {
+    const alvo = dialogo.caixa.querySelector("#pix-tempo");
+    if (!alvo) return;
+    if (expirou) { alvo.className = "pix-tempo expirou"; alvo.textContent = "Código expirado. Gere um novo código para continuar."; return; }
+    const m = String(Math.floor(restante / 60)).padStart(2, "0");
+    const s = String(restante % 60).padStart(2, "0");
+    alvo.textContent = "Tempo restante: " + m + ":" + s;
+  }
+  pintarTempo();
+  intervaloTimerPix = setInterval(function () {
+    restante--;
+    if (restante <= 0) {
+      restante = 0; expirou = true;
+      if (intervaloConsultaPix) { clearInterval(intervaloConsultaPix); intervaloConsultaPix = null; }
+    }
+    pintarTempo();
+  }, 1000);
+  if (restante > 0) {
+    intervaloConsultaPix = setInterval(function () { consultarPagamento(false); }, 5000);
+  }
+
+  async function consultarPagamento(manual) {
+    const alvo = dialogo.caixa.querySelector("#pix-status");
+    if (alvo && manual) alvo.textContent = "Verificando o pagamento…";
+    const r = await carregarAcesso();
+    if (r.estado === "ok" && r.info.liberado) {
+      limparTimers();
+      dialogo.fechar();
+      await track("pagamento_confirmado", {});
+      acessoAtual = r.info;
+      abrirDialogo({
+        titulo: "Pagamento confirmado",
+        conteudo: "<p>Seu acesso foi liberado" + (r.info.valid_until ? " até <b>" + fmtData(r.info.valid_until) + "</b>" : "") + ". Bom trabalho!</p>",
+        acoes: [{ rotulo: "Acessar a calculadora", variante: "btn-primario", aoClicar: function (d) { d.fechar(); } }],
+        aoFechar: function () { abrir(); }
+      });
+      return;
+    }
+    if (alvo) {
+      alvo.textContent = r.estado === "erro_rede"
+        ? "Sem conexão no momento. Vamos tentar de novo automaticamente."
+        : (expirou ? "Este código expirou. Gere um novo para concluir o pagamento." : "Aguardando o pagamento. A liberação é automática.");
+    }
+    if (manual && r.estado !== "erro_rede" && !expirou) {
+      notificar("Ainda não identificamos o pagamento. Se você acabou de pagar, aguarde alguns instantes.", "info");
+    }
+  }
+}
+
+/* ---------- gerenciar assinatura ---------- */
+async function gerenciar(acao) {
+  try {
+    const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.gerenciar, { body: { acao: acao } });
+    if (error) return { ok: false, indisponivel: ehIndisponivel(error), erro: textoErro(error) };
+    if (!data || data.erro) return { ok: false, indisponivel: false, erro: (data && data.erro) || "Não foi possível concluir a operação." };
+    return { ok: true, data: data };
+  } catch (err) {
+    return { ok: false, indisponivel: ehIndisponivel(err), erro: textoErro(err) };
+  }
+}
+function avisoIndisponivel(titulo) {
+  abrirDialogo({
+    titulo: titulo,
+    conteudo:
+      "<p>Este recurso ainda não está disponível no portal.</p>" +
+      "<p>Para ativar, é preciso aplicar a atualização de backend que acompanha este arquivo. Enquanto isso, nada foi alterado na sua assinatura.</p>" +
+      canaisSuporteHtml(),
+    acoes: [{ rotulo: "Entendi", variante: "btn-primario", aoClicar: function (d) { d.fechar(); } }]
+  });
+}
+function canaisSuporteHtml() {
+  const linhas = [];
+  if (CFG.suporteWhatsapp) linhas.push('<a class="btn btn-pix btn-bloco" target="_blank" rel="noopener" href="https://wa.me/' + esc(String(CFG.suporteWhatsapp).replace(/\D/g, "")) + '">' + ico("suporte", 17) + "Falar no WhatsApp</a>");
+  if (CFG.suporteEmail) linhas.push('<a class="btn btn-primario btn-bloco" href="mailto:' + esc(CFG.suporteEmail) + '">' + ico("email", 17) + "Enviar e-mail</a>");
+  if (!linhas.length) return '<p class="dica">Nenhum canal de suporte configurado ainda neste portal.</p>';
+  return linhas.join("");
+}
+function abrirSuporte() {
+  abrirDialogo({
+    titulo: "Falar com o suporte",
+    conteudo:
+      "<p>Conte o que aconteceu e responderemos o mais rápido possível.</p>" +
+      "<p class=\"dica\">Dica: informe o e-mail usado na sua conta e, se houver, o horário aproximado do problema.</p>" +
+      canaisSuporteHtml(),
+    acoes: [{ rotulo: "Fechar", variante: "btn-fantasma", aoClicar: function (d) { d.fechar(); } }]
+  });
+}
+function abrirAjuda() {
+  const itens = CFG.ajuda.map(function (i) {
+    return '<li><div class="item-acao" style="cursor:default"><span style="flex:none;margin-top:2px">' + ico("info", 17) + "</span>" +
+      "<span><b>" + esc(i.q) + "</b><span>" + esc(i.a) + "</span></span></div></li>";
+  }).join("");
+  abrirDialogo({
+    titulo: "Ajuda rápida",
+    conteudo: '<ul class="lista-acoes">' + itens + "</ul>",
+    acoes: [
+      { rotulo: "Falar com o suporte", variante: "btn-fantasma", icone: "suporte", aoClicar: function (d) { d.fechar(); abrirSuporte(); } },
+      { rotulo: "Fechar", variante: "btn-limpo", aoClicar: function (d) { d.fechar(); } }
+    ]
+  });
+}
+function abrirConta(info) {
+  const s = info.situacao;
+  const podeAssinar = s.chave !== "ok";
+  const itens = [
+    { acao: "minha-assinatura", icone: "escudo", titulo: "Minha assinatura", descricao: s.rotulo + (info.valid_until ? " · até " + fmtData(info.valid_until) : "") },
+    podeAssinar ? { acao: "assinar", icone: "cartao", titulo: "Assinar ou reativar", descricao: "Cartão ou PIX" } : null,
+    { acao: "faturas", icone: "arquivo", titulo: "Faturas e recibos", descricao: "Histórico de cobranças" },
+    { acao: "cartao", icone: "cartao", titulo: "Atualizar forma de pagamento", descricao: "Abre o ambiente seguro de pagamento" },
+    s.chave === "ok" || (info.valid_until && new Date(info.valid_until).getTime() > Date.now())
+      ? { acao: "cancelar", icone: "x", titulo: "Cancelar assinatura", descricao: "Sem nova cobrança" } : null,
+    { acao: "dados", icone: "baixar", titulo: "Baixar meus dados", descricao: "Arquivo com os dados da sua conta" },
+    { acao: "termos", icone: "externo", titulo: "Termos de Uso", descricao: "Abrir em nova aba" },
+    { acao: "privacidade", icone: "externo", titulo: "Política de Privacidade", descricao: "Abrir em nova aba" },
+    { acao: "suporte", icone: "suporte", titulo: "Falar com o suporte", descricao: "Precisa de ajuda?" },
+    { acao: "excluir", icone: "lixeira", titulo: "Excluir minha conta", descricao: "Apaga a conta e os dados", perigoso: true },
+    { acao: "sair", icone: "sair", titulo: "Sair", descricao: "Encerrar a sessão neste aparelho" }
+  ].filter(Boolean);
+
+  const corpo = '<ul class="lista-acoes">' + itens.map(function (i) {
+    return "<li><button type=\"button\" class=\"item-acao" + (i.perigoso ? " perigo" : "") + '" data-acao="' + i.acao + '">' +
+      ico(i.icone, 18) + "<span><b>" + esc(i.titulo) + "</b><span>" + esc(i.descricao) + "</span></span></button></li>";
+  }).join("") + "</ul>";
+
+  const dialogo = abrirDialogo({
+    titulo: "Sua conta",
+    conteudo: corpo,
+    acoes: [{ rotulo: "Fechar", variante: "btn-limpo", aoClicar: function (d) { d.fechar(); } }]
+  });
+
+  const acoes = {
+    "minha-assinatura": function () { dialogo.fechar(); abrirDetalhes(info); },
+    "assinar": function () { dialogo.fechar(); abrir(); },
+    "faturas": function () { dialogo.fechar(); abrirFaturas(); },
+    "cartao": function () { dialogo.fechar(); abrirPortalPagamento(); },
+    "cancelar": function () { dialogo.fechar(); cancelarAssinatura(info); },
+    "dados": function () { dialogo.fechar(); exportarDados(); },
+    "termos": function () { dialogo.fechar(); window.open("termos.html", "_blank", "noopener"); },
+    "privacidade": function () { dialogo.fechar(); window.open("privacidade.html", "_blank", "noopener"); },
+    "suporte": function () { dialogo.fechar(); abrirSuporte(); },
+    "excluir": function () { dialogo.fechar(); excluirConta(); },
+    "sair": function () { dialogo.fechar(); sair(); }
+  };
+  dialogo.caixa.querySelectorAll("[data-acao]").forEach(function (b) {
+    b.onclick = function () { const f = acoes[b.dataset.acao]; if (f) f(); };
+  });
+}
+function abrirDetalhes(info) {
+  const linhas = [
+    ["Situação", info.situacao.rotulo],
+    ["Acesso até", info.valid_until ? fmtData(info.valid_until) : "—"],
+    ["Dias restantes", typeof info.dias === "number" ? plural(info.dias, "dia") : "—"],
+    ["Ativação", info.ativado_em ? fmtData(info.ativado_em) : "—"],
+    ["Renovação", "Mensal, no meio de pagamento escolhido"]
+  ];
+  abrirDialogo({
+    titulo: "Minha assinatura",
+    conteudo: "<ul class=\"detalhes\">" + linhas.map(function (l) {
+      return "<li><span>" + esc(l[0]) + "</span><b>" + esc(l[1]) + "</b></li>";
+    }).join("") + "</ul><p class=\"dica\">" + esc(info.situacao.descricao.replace(/<[^>]+>/g, "")) + "</p>",
+    acoes: [{ rotulo: "Fechar", variante: "btn-limpo", aoClicar: function (d) { d.fechar(); } }]
+  });
+}
+async function abrirFaturas() {
+  const d = abrirDialogo({
+    titulo: "Faturas e recibos",
+    conteudo: '<p class="carregando" role="status">Buscando o histórico…</p>',
+    acoes: [{ rotulo: "Fechar", variante: "btn-limpo", aoClicar: function (x) { x.fechar(); } }]
+  });
+  const r = await gerenciar("faturas");
+  if (!d.fundo.isConnected) return;
+  if (!r.ok) {
+    d.caixa.querySelector(".dialogo-corpo").innerHTML =
+      "<p>" + (r.indisponivel ? "O histórico de faturas ainda não está disponível no portal." : esc(r.erro)) + "</p>" + canaisSuporteHtml();
+    return;
+  }
+  const faturas = (r.data.faturas || []);
+  if (!faturas.length) {
+    d.caixa.querySelector(".dialogo-corpo").innerHTML = "<p>Nenhuma cobrança registrada até agora.</p>";
+    return;
+  }
+  d.caixa.querySelector(".dialogo-corpo").innerHTML = '<ul class="detalhes">' + faturas.map(function (f) {
+    const valor = f.valor || f.total || 0;
+    const status = f.status || "";
+    const link = f.url || f.link || f.recibo;
+    return "<li><span>" + esc(fmtData(f.data || f.criado_em)) + " · " + esc(status) + "</span>" +
+      (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener">' + esc(brl(valor)) + "</a>" : "<b>" + esc(brl(valor)) + "</b>") + "</li>";
+  }).join("") + "</ul>";
+}
+async function abrirPortalPagamento() {
+  const d = abrirDialogo({ titulo: "Forma de pagamento", conteudo: '<p class="carregando" role="status">Abrindo o ambiente seguro…</p>', acoes: [] });
+  const r = await gerenciar("portal");
+  d.fechar();
+  if (r.ok && (r.data.url || r.data.link)) { location.href = r.data.url || r.data.link; return; }
+  if (r.indisponivel) return avisoIndisponivel("Atualizar forma de pagamento");
+  notificar(r.erro || "Não foi possível abrir o ambiente de pagamento.", "erro");
+}
+async function cancelarAssinatura(info) {
+  const confirmado = await confirmar({
+    titulo: "Cancelar assinatura",
+    texto: "Você não terá novas cobranças e continua com acesso até <b>" +
+      esc(info.valid_until ? fmtData(info.valid_until) : "o fim do período já pago") + "</b>. Deseja cancelar?",
+    rotuloOk: "Sim, cancelar assinatura",
+    perigoso: true
+  });
+  if (!confirmado) return;
+  const d = abrirDialogo({ titulo: "Cancelar assinatura", conteudo: '<p class="carregando" role="status">Enviando o pedido…</p>', acoes: [] });
+  const r = await gerenciar("cancelar");
+  d.fechar();
+  if (r.ok) {
+    await track("assinatura_cancelada", {});
+    abrirDialogo({
+      titulo: "Assinatura cancelada",
+      conteudo: "<p>Não haverá novas cobranças." + (r.data.acesso_ate || info.valid_until ? " Seu acesso continua até <b>" + fmtData(r.data.acesso_ate || info.valid_until) + "</b>." : "") + "</p>",
+      acoes: [{ rotulo: "Entendi", variante: "btn-primario", aoClicar: function (x) { x.fechar(); abrir(); } }]
+    });
+    return;
+  }
+  if (r.indisponivel) return avisoIndisponivel("Cancelar assinatura");
+  notificar(r.erro || "Não foi possível cancelar agora. Tente novamente ou fale com o suporte.", "erro");
+}
+async function exportarDados() {
+  const sessao = await obterSessao();
+  if (!sessao) return notificar("Sessão expirada. Entre novamente.", "erro");
+  const pacote = {
+    gerado_em: new Date().toISOString(),
+    portal: { versao: CFG.versao },
+    conta: {
+      id: sessao.user.id,
+      email: sessao.user.email,
+      criada_em: sessao.user.created_at,
+      consentimento_registrado: (sessao.user.user_metadata || {}).aceite_termos || null
+    },
+    dados: {}
+  };
+  const tabelas = ["perfil", "assinaturas", "consentimentos"];
+  for (let i = 0; i < tabelas.length; i++) {
+    try {
+      const { data, error } = await sb.from(tabelas[i]).select("*");
+      if (!error) pacote.dados[tabelas[i]] = data;
+    } catch (e) {}
+  }
+  baixarJson("meus-dados-" + new Date().toISOString().slice(0, 10) + ".json", pacote);
+  notificar("Arquivo com seus dados gerado.", "ok");
+}
+async function excluirConta() {
+  const confirmado = await confirmar({
+    titulo: "Excluir minha conta",
+    texto: "Esta ação apaga sua conta, seus dados e o acesso à calculadora. <b>Não é possível desfazer.</b>",
+    rotuloOk: "Excluir definitivamente",
+    perigoso: true
+  });
+  if (!confirmado) return;
+  const d = abrirDialogo({ titulo: "Excluir conta", conteudo: '<p class="carregando" role="status">Excluindo sua conta…</p>', acoes: [] });
+  try {
+    const { data, error } = await sb.functions.invoke(CFG.funcoes.conta, { body: {} });
+    d.fechar();
+    if (error || (data && data.error)) return notificar(error ? textoErro(error) : data.error, "erro");
+    await track("conta_excluida", {});
+    await sb.auth.signOut();
+    telaLogin("Sua conta foi excluída. Obrigado por ter usado o portal.");
+  } catch (err) {
+    d.fechar();
+    notificar(textoErro(err), "erro");
+  }
+}
+async function sair() {
+  limparTimers();
+  try { await sb.auth.signOut(); } catch (e) {}
+  telaLogin("Você saiu da sua conta.");
+}
+
+/* ---------------------- aplicativo (calculadora) ---------------------- */
+async function telaApp(info) {
+  const s = info.situacao;
   document.body.classList.add("modo-app");
   const tela = $("tela");
   tela.className = "tela tela-app";
-  tela.innerHTML = 
+  tela.innerHTML =
     '<header class="barra">' +
-      '<b>Calculadora de Caldeiraria</b>' +
-      '<div style="margin-left:auto; display:flex; gap:8px;">' +
-        '<button class="btn btn-fantasma" style="width:auto;padding:5px 12px;margin:0;font-size:12px;" id="sair">Sair</button>' +
-      '</div>' +
-    '</header>' +
-    '<section class="quadro">' +
-      // ADICIONADO allow-downloads para permitir a geração e download de arquivos PDF
-      '<iframe id="iframe-app" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin allow-downloads" title="Calculadora de Caldeiraria"></iframe>' +
-    '</section>';
+      '<span class="barra-marca">' + ico("escudo", 18) + "<b>Calculadora de Caldeiraria</b></span>" +
+      '<span class="barra-chip ' + (s.destaque ? "chip-aviso" : (s.chave === "ok" ? "chip-ok" : "chip-neutro")) + '" id="chip-assinatura">' +
+        ico(s.icone, 14) + esc(s.resumo) + "</span>" +
+      '<span class="barra-espaco"></span>' +
+      '<button class="btn btn-fantasma btn-xs" id="b-ajuda" type="button">' + ico("ajuda", 15) + "Ajuda</button>" +
+      '<button class="btn btn-fantasma btn-xs" id="b-suporte" type="button">' + ico("suporte", 15) + "Suporte</button>" +
+      '<button class="btn btn-primario btn-xs" id="b-conta" type="button">' + ico("usuario", 15) + "Conta</button>" +
+    "</header>" +
+    '<div class="faixa faixa-' + (s.destaque ? (s.chave === "erro" ? "urgente" : "aviso") : "info") + '" id="faixa" hidden></div>' +
+    '<div class="quadro"><iframe id="quadro-app" title="Calculadora de Caldeiraria" sandbox="' + SANDBOX_CONTEUDO + '"></iframe></div>';
 
-  $("iframe-app").srcdoc = htmlConteudo;
-  $("sair").onclick = async () => { await sb.auth.signOut(); telaLogin(); };
+  const iframe = $("quadro-app");
+  try { iframe.srcdoc = info.conteudo.html || ""; } catch (e) {}
+
+  $("b-ajuda").onclick = abrirAjuda;
+  $("b-suporte").onclick = abrirSuporte;
+  $("b-conta").onclick = function () { abrirConta(info); };
+
+  mostrarFaixa(info);
+  await track("calculadora_aberta", { origem: info.origem, situacao: s.chave });
+
+  // Observa a versão do conteúdo: avisa em vez de recarregar e apagar o trabalho em andamento.
+  intervaloVersao = setInterval(function () { verificarVersao(info); }, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", aoVoltarParaAba, { passive: true });
 }
+function mostrarFaixa(info) {
+  const faixa = $("faixa");
+  if (!faixa) return;
+  const s = info.situacao;
+  if (s.chave === "aviso") {
+    faixa.hidden = false;
+    faixa.className = "faixa faixa-aviso";
+    faixa.innerHTML = ico("info", 16) + "<p>" + esc(s.descricao.replace(/<[^>]+>/g, "")) + "</p>" +
+      '<button class="btn btn-fantasma btn-xs" id="f-conta" type="button">Ver assinatura</button>';
+  } else if (s.chave === "ok" && s.destaque) {
+    faixa.hidden = false;
+    faixa.className = "faixa faixa-info";
+    faixa.innerHTML = ico("calendario", 16) + "<p>Sua assinatura renova perto de <b>" +
+      esc(info.valid_until ? fmtData(info.valid_until) : "—") + "</b>. Garanta que a forma de pagamento esteja em dia.</p>" +
+      '<button class="btn btn-fantasma btn-xs" id="f-conta" type="button">Ver assinatura</button>';
+  } else {
+    faixa.hidden = true;
+    faixa.innerHTML = "";
+    return;
+  }
+  const b = $("f-conta");
+  if (b) b.onclick = function () { abrirConta(info); };
+}
+async function verificarVersao(info) {
+  if (document.hidden) return;
+  const versao = await buscarVersao();
+  if (versao === null || versao === "" || versao === (info.conteudo.versao || "")) return;
+  const faixa = $("faixa");
+  if (!faixa) return;
+  faixa.hidden = false;
+  faixa.className = "faixa faixa-info";
+  faixa.innerHTML = ico("atualizar", 16) + "<p>Existe uma versão nova da calculadora (v" + esc(versao) + "). Seus dados estão salvos.</p>" +
+    '<button class="btn btn-primario btn-xs" id="f-atualizar" type="button">Atualizar agora</button>';
+  $("f-atualizar").onclick = function () { abrir(); };
+}
+async function aoVoltarParaAba() {
+  if (document.hidden || !document.body.classList.contains("modo-app")) return;
+  if (Date.now() - ultimaRevalidacao < 10 * 60 * 1000) return;
+  ultimaRevalidacao = Date.now();
+  const r = await carregarAcesso();
+  if (r.estado !== "ok") return;
+  acessoAtual = r.info;
+  if (!r.info.liberado) { limparTimers(); return telaAssinar(r.info); }
+  if (r.info.situacao.chave === "aviso") mostrarFaixa(r.info);
+}
+let ultimaRevalidacao = 0;
 
-window.addEventListener("DOMContentLoaded", () => carregarPortal());
+/* ---------------------- integração com a calculadora ---------------------- */
+window.addEventListener("message", async function (e) {
+  const iframe = $("quadro-app");
+  if (!iframe || e.source !== iframe.contentWindow) return;
+  const d = e.data || {};
+  if (d.t === "logo-pedir") {
+    if (!acessoAtual || !acessoAtual.liberado) return;
+    try {
+      const { data } = await sb.from("perfil").select("logo").maybeSingle();
+      if (data && data.logo) iframe.contentWindow.postMessage({ t: "logo", url: data.logo }, ORIGEM_CONTEUDO);
+    } catch (err) {}
+  } else if (d.t === "logo-salvar") {
+    if (typeof d.url !== "string" || !/^data:image\//.test(d.url) || d.url.length > 300000) return;
+    if (!acessoAtual || !acessoAtual.liberado) return;
+    const sessao = await obterSessao();
+    if (!sessao) return;
+    try {
+      await sb.from("perfil").upsert({ user_id: sessao.user.id, logo: d.url, atualizado_em: new Date().toISOString() });
+    } catch (err) {}
+  }
+});
+
+/* ---------------------------- inicialização ---------------------------- */
+window.addEventListener("unhandledrejection", function (e) {
+  console.error(e.reason);
+});
+window.addEventListener("error", function (e) {
+  if (e && e.message) console.error(e.message);
+});
+
+(async function iniciar() {
+  if (!sb) return telaFalhaCarregamento();
+  try {
+    sb.auth.onAuthStateChange(function (evento) {
+      if (evento === "PASSWORD_RECOVERY") { modoRecuperacao = true; telaNovaSenha(); return; }
+      if (evento === "SIGNED_OUT" && !modoRecuperacao) {
+        limparTimers();
+        marcarForaDoApp();
+        telaLogin();
+      }
+    });
+    if (modoRecuperacao) return telaNovaSenha();
+    await abrir();
+  } catch (err) {
+    telaErroConexao(textoErro(err), abrir);
+  }
+})();
 </script>
 </body>
 </html>
