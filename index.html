@@ -255,7 +255,7 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.6.0",
+  versao: "1.7.0",
   termosVersao: "2026-10-22",
 
   // Funções já existentes na base atual (não renomeadas).
@@ -1141,7 +1141,17 @@ const CHAVES_PIX_CODIGO = ["qr_code", "qrCode", "qr_code_text", "qr_code_content
 const CHAVES_PIX_CODIGO_GENERICO = ["code", "codigo", "codigo_pix", "text", "content", "value"];
 const CHAVES_PIX_IMAGEM = ["qr_code_base64", "qrCodeBase64", "qrcode_base64", "qr_code_image", "qrCodeImage", "imagem_base64", "image_base64", "base64", "qr_image", "imagem", "image"];
 const CHAVES_URL = ["url", "link", "checkout_url", "checkoutUrl", "init_point", "initPoint", "redirect_url", "redirectUrl", "payment_url", "paymentUrl", "ticket_url", "invoice_url", "short_url", "shortUrl"];
-const CHAVES_VALOR = ["valor", "amount", "value", "total", "price", "valor_total"];
+const CHAVES_VALOR = ["valor", "preco", "preço", "valor_mensal", "preco_mensal", "mensalidade", "valor_assinatura", "preco_assinatura", "amount", "value", "total", "price", "valor_total",
+  "valor_centavos", "preco_centavos", "amount_cents", "price_cents", "unit_amount"];
+/* Aceita 49.9, "49.90", "49,90", "R$ 49,90" e "1.234,56". */
+function paraNumero(v) {
+  if (typeof v === "number") return isFinite(v) ? v : NaN;
+  if (typeof v !== "string") return NaN;
+  let t = v.replace(/[^0-9.,-]/g, "");
+  if (!t) return NaN;
+  if (t.indexOf(",") >= 0) t = t.replace(/\./g, "").replace(",", ".");
+  return Number(t);
+}
 
 function primeiroValor(obj, chaves) {
   if (!obj || typeof obj !== "object") return null;
@@ -1194,8 +1204,8 @@ function acharCodigoPix(obj) {
 function acharValor(obj) {
   if (!obj || typeof obj !== "object") return null;
   for (let i = 0; i < CHAVES_VALOR.length; i++) {
-    const n = Number(obj[CHAVES_VALOR[i]]);
-    if (n > 0) return /centavos|cents/i.test(CHAVES_VALOR[i]) ? n / 100 : n;
+    const n = paraNumero(obj[CHAVES_VALOR[i]]);
+    if (n > 0) return /centavos|cents|unit_amount/i.test(CHAVES_VALOR[i]) ? n / 100 : n;
   }
   for (let i = 0; i < CHAVES_ANINHADAS.length; i++) {
     const v = obj[CHAVES_ANINHADAS[i]];
@@ -1362,7 +1372,7 @@ function normalizarExpiracao(data) {
 }
 function exibirPix(pix) {
   limparTimers();
-  const valor = (Number(pix.valor) > 0 ? Number(pix.valor) : (acessoAtual && acessoAtual.preco ? acessoAtual.preco : null));
+  const valor = (paraNumero(pix.valor) > 0 ? paraNumero(pix.valor) : (acessoAtual && acessoAtual.preco ? acessoAtual.preco : null));
   let restante = typeof pix.expiracao === "number" ? pix.expiracao : CFG.expiracaoPixSegundos;
   let expirou = false;
 
