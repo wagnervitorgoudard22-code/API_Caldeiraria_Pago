@@ -255,7 +255,7 @@ const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.5.0",
+  versao: "1.6.0",
   termosVersao: "2026-10-22",
 
   // Funções já existentes na base atual (não renomeadas).
@@ -277,8 +277,9 @@ const CFG = {
   analitica: true,
 
   // Preencha para liberar os botões de suporte (deixe vazio para ocultar).
-  suporteWhatsapp: "",   // exemplo: "5511999998888"
-  suporteEmail: "",      // exemplo: "suporte@suaempresa.com.br"
+  suporteWhatsapp: "5547992399616",          // (47) 99239-9616
+  suporteWhatsappTexto: "(47) 99239-9616",
+  suporteEmail: "goudardimports@gmail.com",
 
   ajuda: [
     { q: "Como uso a calculadora?", a: "Digite as medidas no formulário e use o botão de calcular. O resultado pode ser impresso ou salvo no seu computador." },
@@ -355,6 +356,7 @@ const sb = (window.supabase && window.supabase.createClient)
 
 /* ---------------------------- estado ---------------------------- */
 let acessoAtual = null;      // última verificação de acesso
+let emailUsuario = "";       // e-mail da conta logada (usado na mensagem ao suporte)
 let modoRecuperacao = /type=recovery/.test(location.hash) || /type=recovery/.test(location.search);
 let intervaloTimerPix = null, intervaloConsultaPix = null, intervaloVersao = null;
 let acaoContaAtual = null;   // guarda o "Conta" aberto para dialogo seguinte
@@ -395,6 +397,7 @@ function textoErro(err) {
   if (/same password/.test(s)) return "A nova senha precisa ser diferente da anterior.";
   if (/invalid.*token|expired|otp_expired/.test(s)) return "Este link expirou ou já foi usado. Peça um novo link.";
   if (/not found|failed to send a request/.test(s)) return "Recurso indisponível no momento.";
+  if (/non-2xx/.test(s)) return "O servidor recusou a solicitação. Tente novamente; se persistir, fale com o suporte.";
   return m || "Não foi possível concluir a operação. Tente novamente.";
 }
 function ehErroDeRede(err) {
@@ -588,7 +591,8 @@ function ligarOlhos() {
   });
 }
 function rodapeLinks() {
-  return '<p class="rodape">Portal v' + esc(CFG.versao) + ' · <a href="termos.html" target="_blank" rel="noopener">Termos de Uso</a> · <a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a></p>';
+  const suporte = CFG.suporteWhatsapp ? ' · <a href="' + esc(linkWhatsapp()) + '" target="_blank" rel="noopener">Suporte</a>' : "";
+  return '<p class="rodape">Portal v' + esc(CFG.versao) + ' · <a href="termos.html" target="_blank" rel="noopener">Termos de Uso</a> · <a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a>' + suporte + "</p>";
 }
 function campoSenha(id, rotulo, autocomplete) {
   return '<div class="grupo"><label class="rotulo" for="' + id + '">' + rotulo + "</label>" +
@@ -992,6 +996,7 @@ async function carregarAcessoLocal() {
 async function carregarAcesso() {
   const sessao = await obterSessao();
   if (!sessao) return { estado: "sem_sessao" };
+  emailUsuario = (sessao.user && sessao.user.email) || "";
   let falha = null;
   try {
     const { data, error } = await sb.functions.invoke(CFG.funcoesNovas.acesso, { body: {} });
@@ -1018,16 +1023,35 @@ async function carregarAcesso() {
   return carregarAcessoLocal();
 }
 
+/* Quando a função do servidor responde com erro, o supabase-js só diz
+   "non-2xx status code". Aqui lemos a mensagem real que o servidor mandou. */
+async function lerErroFuncao(error) {
+  const status = (error && error.context && error.context.status) || (error && error.status) || null;
+  let mensagem = "";
+  try {
+    const resp = error && error.context;
+    if (resp && typeof resp.clone === "function") {
+      const texto = await resp.clone().text();
+      try {
+        const j = JSON.parse(texto);
+        mensagem = j.erro || j.error || j.message || j.mensagem || texto;
+      } catch (e) { mensagem = texto; }
+    }
+  } catch (e) {}
+  if (!mensagem) mensagem = (error && error.message) || "";
+  return { status: status, mensagem: String(mensagem || "").slice(0, 400) };
+}
 async function carregarPreco() {
   try {
     const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "obter_preco" } });
     if (error) {
-      console.warn("[portal] falha ao obter o preço:", error);
-      return { ok: false, detalhe: textoErro(error) };
+      const real = await lerErroFuncao(error);
+      console.warn("[portal] falha ao obter o preço:", real, error);
+      return { ok: false, detalhe: (real.status ? "HTTP " + real.status + " · " : "") + (real.mensagem || textoErro(error)) };
     }
     const r = desembrulharResposta(data);
     const preco = acharValor(r);
-    if (!(preco > 0)) return { ok: false, detalhe: "Valor não informado pelo servidor." };
+    if (!(preco > 0)) return { ok: false, detalhe: "O servidor respondeu sem o valor. Campos recebidos: " + resumoResposta(data) };
     return { ok: true, preco: preco };
   } catch (err) {
     return { ok: false, detalhe: textoErro(err) };
@@ -1086,18 +1110,17 @@ function renderPagamento(preco) {
   const alvo = $("pagamento");
   if (!alvo) return;
   if (!preco.ok) {
+    /* Antes o portal travava aqui e o cliente não conseguia pagar.
+       Agora os botões aparecem mesmo assim: o valor é mostrado na tela do PIX
+       e na página segura do cartão, que vêm direto do servidor. */
     alvo.innerHTML =
-      '<div class="bloco-aviso">' + ico("alerta", 18) +
-      "<p>Não conseguimos confirmar o valor da assinatura agora, então preferimos não exibir um valor que pode estar desatualizado.</p></div>" +
-      '<button class="btn btn-primario btn-bloco" id="b-recarregar-preco" type="button">Tentar novamente</button>';
-    $("b-recarregar-preco").onclick = async function (e) {
-      const botao = e.currentTarget;
-      travar(botao, "Confirmando…");
-      const p = await carregarPreco();
-      liberar(botao, "Tentar novamente");
-      renderPagamento(p);
-      if (!p.ok) notificar("Ainda sem resposta do servidor. Tente novamente em instantes.", "erro");
-    };
+      '<p class="preco"><b>Assinatura mensal</b><span>O valor aparece na próxima etapa, antes de você confirmar o pagamento.</span></p>' +
+      '<button class="btn btn-destaque btn-bloco" id="b-cartao" type="button">' + ico("cartao", 18) + "Assinar com cartão</button>" +
+      '<button class="btn btn-pix btn-bloco" id="b-pix" type="button">' + ico("pix", 18) + "Pagar com PIX</button>" +
+      '<details class="dica" style="margin:4px 0 10px"><summary style="cursor:pointer">Detalhe técnico (para o suporte)</summary>' +
+        "<p style=\"margin:6px 0 0;word-break:break-word\">" + esc(preco.detalhe || "sem detalhe") + "</p></details>";
+    $("b-cartao").onclick = function (e) { abrirPagamento("cartao", e.currentTarget); };
+    $("b-pix").onclick = function (e) { abrirPagamento("pix", e.currentTarget); };
     return;
   }
   if (acessoAtual) acessoAtual.preco = preco.preco;
@@ -1279,8 +1302,11 @@ async function abrirPagamento(metodo, botao) {
     const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: metodo } });
     if (error || !data) {
       if (botao) liberar(botao, rotuloOriginal);
-      console.warn("[portal] falha ao chamar " + CFG.funcoes.pagamento + " (" + metodo + "):", error);
-      return notificar(mensagemDaFuncao(error, metodo), "erro");
+      const real = error ? await lerErroFuncao(error) : { status: null, mensagem: "" };
+      console.warn("[portal] falha ao chamar " + CFG.funcoes.pagamento + " (" + metodo + "):", real, error);
+      const usarReal = real.mensagem && !/non-2xx/i.test(real.mensagem) && real.status !== 401 && real.status !== 403 && real.status !== 404;
+      const inicial = metodo === "pix" ? "Não conseguimos gerar o código PIX. " : "Não conseguimos abrir o pagamento com cartão. ";
+      return notificar(usarReal ? inicial + "Motivo: " + real.mensagem : mensagemDaFuncao(error, metodo), "erro");
     }
 
     const r = desembrulharResposta(data);
@@ -1457,10 +1483,20 @@ function avisoIndisponivel(titulo) {
     acoes: [{ rotulo: "Entendi", variante: "btn-primario", aoClicar: function (d) { d.fechar(); } }]
   });
 }
+function linkWhatsapp() {
+  const msg = "Olá! Preciso de ajuda com o Orçamento de Caldeiraria." + (emailUsuario ? " Meu e-mail de cadastro: " + emailUsuario : "");
+  return "https://wa.me/" + String(CFG.suporteWhatsapp).replace(/\D/g, "") + "?text=" + encodeURIComponent(msg);
+}
+function linkEmail() {
+  const assunto = "Suporte - Orçamento de Caldeiraria";
+  const corpo = "Olá! Preciso de ajuda com:\n\n\n" + (emailUsuario ? "E-mail da conta: " + emailUsuario + "\n" : "") + "Versão do portal: " + CFG.versao;
+  return "mailto:" + CFG.suporteEmail + "?subject=" + encodeURIComponent(assunto) + "&body=" + encodeURIComponent(corpo);
+}
 function canaisSuporteHtml() {
   const linhas = [];
-  if (CFG.suporteWhatsapp) linhas.push('<a class="btn btn-pix btn-bloco" target="_blank" rel="noopener" href="https://wa.me/' + esc(String(CFG.suporteWhatsapp).replace(/\D/g, "")) + '">' + ico("suporte", 17) + "Falar no WhatsApp</a>");
-  if (CFG.suporteEmail) linhas.push('<a class="btn btn-primario btn-bloco" href="mailto:' + esc(CFG.suporteEmail) + '">' + ico("email", 17) + "Enviar e-mail</a>");
+  if (CFG.suporteWhatsapp) linhas.push('<a class="btn btn-pix btn-bloco" target="_blank" rel="noopener" href="' + esc(linkWhatsapp()) + '">' + ico("suporte", 17) + "WhatsApp " + esc(CFG.suporteWhatsappTexto || "") + "</a>");
+  if (CFG.suporteEmail) linhas.push('<a class="btn btn-primario btn-bloco" href="' + esc(linkEmail()) + '">' + ico("email", 17) + "Enviar e-mail</a>" +
+    '<p class="dica" style="text-align:center;margin-top:6px">' + esc(CFG.suporteEmail) + "</p>");
   if (!linhas.length) return '<p class="dica">Nenhum canal de suporte configurado ainda neste portal.</p>';
   return linhas.join("");
 }
@@ -1657,6 +1693,7 @@ async function excluirConta() {
 async function sair() {
   limparTimers();
   modoRecuperacao = false;
+  emailUsuario = "";
   try { await sb.auth.signOut(); } catch (e) {}
   telaLogin("Você saiu da sua conta.");
 }
