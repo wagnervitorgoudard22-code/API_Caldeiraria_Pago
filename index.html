@@ -180,7 +180,11 @@
   /* ---------- PIX ---------- */
   .pix-rotulo{font-size:12px;color:var(--cinza-600);margin:0 0 2px;text-align:center}
   .pix-valor{font-size:28px;font-weight:700;letter-spacing:-.5px;margin:0 0 10px;text-align:center}
-  .pix-qr{display:block;margin:0 auto 10px;border:1px solid var(--cinza-300);border-radius:var(--raio-sm);padding:6px;background:#fff}
+  .pix-qr-caixa{
+    min-height:188px;display:grid;place-items:center;margin:0 auto 10px;
+    border:1px solid var(--cinza-300);border-radius:var(--raio-sm);padding:6px;background:#fff
+  }
+  .pix-qr{display:block;width:176px;height:176px}
   .pix-tempo{text-align:center;font-weight:600;color:var(--amarelo-900);font-size:13px;margin:0 0 12px}
   .pix-tempo.expirou{color:var(--vermelho-600)}
   .linha-codigo{display:flex;gap:6px;margin-bottom:10px}
@@ -234,12 +238,24 @@
    Portal de acesso · Calculadora de Caldeiraria
    Arquivo único. Mesma base de dados e mesmas funções do portal anterior.
    Ajuste tudo pelo bloco CONFIG abaixo.
+
+   Correções desta versão (1.5.0):
+   1) Sair do app / voltar de qualquer tela dentro do app: o portal não
+      recriava o cartão (#cartao) depois de entrar na calculadora e quebrava
+      com erro. Agora a "casca" da tela é reconstruída automaticamente.
+   2) PDF da calculadora: o iframe de conteúdo estava sem a permissão de
+      download; o navegador bloqueava o arquivo gerado em silêncio.
+   3) PIX: a resposta do servidor passou a ser lida em vários formatos e, se
+      o servidor mandar só o "copia e cola", o QR Code é desenhado aqui.
+   4) Cartão: o endereço do checkout agora é procurado em vários nomes de
+      campo comuns, e qualquer resposta inesperada mostra o que o servidor
+      devolveu (com botão para copiar e enviar ao suporte).
    ========================================================================= */
 const CFG = {
   supabaseUrl: "https://pjnbmvbcknmogznynnvz.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbmJtdmJja25tb2d6bnlubnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzMwNjEsImV4cCI6MjEwNzkwOTA2MX0.Sqdc8NVSEuAGP4_oscJbDHQ9CR-hotnbM2d2N7g4ntw",
 
-  versao: "1.4.0",
+  versao: "1.5.0",
   termosVersao: "2026-10-22",
 
   // Funções já existentes na base atual (não renomeadas).
@@ -253,7 +269,8 @@ const CFG = {
 
   // Isola o conteúdo da calculadora: ele perde acesso à sessão, aos dados de login
   // e ao armazenamento do portal. Se a sua calculadora usar armazenamento local do
-  // navegador, mude para false (a proteção do conteúdo continua valendo).
+  // navegador OU continuar sem salvar o PDF, mude para false (a proteção do
+  // conteúdo continua valendo, mas ele passa a poder ler o token da sessão).
   isolarConteudo: true,
 
   // Registro de eventos do funil. Depende da tabela "eventos" do ajuste de backend.
@@ -273,9 +290,15 @@ const CFG = {
 
 const SUPABASE_URL = CFG.supabaseUrl;
 const SUPABASE_ANON_KEY = CFG.supabaseAnonKey;
-const SANDBOX_CONTEUDO = CFG.isolarConteudo
-  ? "allow-scripts allow-forms allow-modals allow-popups"
-  : "allow-scripts allow-forms allow-modals allow-popups allow-same-origin";
+
+/* Permissões do iframe da calculadora.
+   allow-downloads  -> libera o download do PDF gerado pela calculadora.
+   allow-modals     -> libera window.print() (imprimir / salvar como PDF).
+   allow-popups     -> libera abrir o resultado em outra aba.
+   Se a sua calculadora abrir o PDF em uma janela nova e ela continuar em branco,
+   acrescente também " allow-popups-to-escape-sandbox" ao fim da lista. */
+const PERMISSOES_CONTEUDO = "allow-scripts allow-forms allow-modals allow-popups allow-downloads";
+const SANDBOX_CONTEUDO = CFG.isolarConteudo ? PERMISSOES_CONTEUDO : PERMISSOES_CONTEUDO + " allow-same-origin";
 const ORIGEM_CONTEUDO = CFG.isolarConteudo ? "*" : location.origin;
 const URL_RETORNO = location.origin + location.pathname;
 
@@ -335,6 +358,8 @@ let acessoAtual = null;      // última verificação de acesso
 let modoRecuperacao = /type=recovery/.test(location.hash) || /type=recovery/.test(location.search);
 let intervaloTimerPix = null, intervaloConsultaPix = null, intervaloVersao = null;
 let acaoContaAtual = null;   // guarda o "Conta" aberto para dialogo seguinte
+let ultimaRevalidacao = 0;
+let avisoConstruido = null;  // evita recriar o aviso de versão nova
 
 /* ---------------------------- avisos ---------------------------- */
 function notificar(texto, tipo) {
@@ -488,6 +513,13 @@ function baixarJson(nome, objeto) {
   a.href = url; a.download = nome; document.body.appendChild(a); a.click();
   setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
 }
+function copiarTexto(texto) {
+  return new Promise(function (resolve) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(function () { resolve(true); }, function () { resolve(false); });
+    } else resolve(false);
+  });
+}
 
 /* ---------------------------- analítica ---------------------------- */
 async function track(evento, dados) {
@@ -513,10 +545,22 @@ async function obterSessao() {
     return (data && data.session) || null;
   } catch (e) { return null; }
 }
+/* CORREÇÃO 1: ao entrar na calculadora, o elemento #cartao deixa de existir.
+   Toda tela de cartão (login, assinatura, erro) precisa da "casca" de volta,
+   senão qualquer navegação a partir do app — inclusive Sair — quebrava. */
+function obterCartao() {
+  const tela = $("tela");
+  let cartao = $("cartao");
+  if (!cartao) {
+    tela.innerHTML = '<section class="cartao" id="cartao"></section>';
+    cartao = $("cartao");
+  }
+  return cartao;
+}
 function marcarForaDoApp() {
   document.body.classList.remove("modo-app");
   const tela = $("tela");
-  if (tela) tela.className = "tela";
+  if (tela && tela.className !== "tela") tela.className = "tela";
 }
 function limparTimers() {
   [intervaloTimerPix, intervaloConsultaPix, intervaloVersao].forEach(function (i) { if (i) clearInterval(i); });
@@ -526,7 +570,7 @@ function limparTimers() {
 /* ---------------------------- telas ---------------------------- */
 function mostrarCartao(html) {
   marcarForaDoApp();
-  const cartao = $("cartao");
+  const cartao = obterCartao();
   cartao.setAttribute("aria-busy", "false");
   cartao.innerHTML = html;
 }
@@ -977,8 +1021,12 @@ async function carregarAcesso() {
 async function carregarPreco() {
   try {
     const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { acao: "obter_preco" } });
-    if (error) return { ok: false, detalhe: textoErro(error) };
-    const preco = Number(data && (data.preco || data.valor));
+    if (error) {
+      console.warn("[portal] falha ao obter o preço:", error);
+      return { ok: false, detalhe: textoErro(error) };
+    }
+    const r = desembrulharResposta(data);
+    const preco = acharValor(r);
     if (!(preco > 0)) return { ok: false, detalhe: "Valor não informado pelo servidor." };
     return { ok: true, preco: preco };
   } catch (err) {
@@ -989,8 +1037,9 @@ async function carregarPreco() {
 /* ---------- fluxo principal ---------- */
 async function abrir() {
   limparTimers();
+  avisoConstruido = null;
   marcarForaDoApp();
-  const cartao = $("cartao");
+  const cartao = obterCartao();
   cartao.setAttribute("aria-busy", "true");
   cartao.innerHTML = '<p class="carregando" role="status">Verificando seu acesso…</p>';
   let r;
@@ -1060,6 +1109,168 @@ function renderPagamento(preco) {
   $("b-pix").onclick = function (e) { abrirPagamento("pix", e.currentTarget); };
 }
 
+/* ------------------ leitura tolerante da resposta do servidor ------------------
+   O servidor de pagamento pode devolver os dados em nomes de campo diferentes
+   (qr_code, brCode, copia_cola, url, link, init_point …) ou dentro de um objeto
+   aninhado. Aqui normalizamos tudo antes de usar. */
+const CHAVES_ANINHADAS = ["data", "dados", "result", "resultado", "payment", "pagamento", "pix", "cobranca", "body", "response"];
+const CHAVES_PIX_CODIGO = ["qr_code", "qrCode", "qr_code_text", "qr_code_content", "brCode", "br_code", "pix_copia_cola", "copia_cola", "copy_paste", "copyPaste", "emv", "payload", "pixCode"];
+const CHAVES_PIX_CODIGO_GENERICO = ["code", "codigo", "codigo_pix", "text", "content", "value"];
+const CHAVES_PIX_IMAGEM = ["qr_code_base64", "qrCodeBase64", "qrcode_base64", "qr_code_image", "qrCodeImage", "imagem_base64", "image_base64", "base64", "qr_image", "imagem", "image"];
+const CHAVES_URL = ["url", "link", "checkout_url", "checkoutUrl", "init_point", "initPoint", "redirect_url", "redirectUrl", "payment_url", "paymentUrl", "ticket_url", "invoice_url", "short_url", "shortUrl"];
+const CHAVES_VALOR = ["valor", "amount", "value", "total", "price", "valor_total"];
+
+function primeiroValor(obj, chaves) {
+  if (!obj || typeof obj !== "object") return null;
+  for (let i = 0; i < chaves.length; i++) {
+    const v = obj[chaves[i]];
+    if (typeof v === "string" && v.trim()) return v.trim();
+    if (typeof v === "number" && isFinite(v) && v !== 0) return String(v);
+  }
+  return null;
+}
+function desembrulharResposta(data) {
+  if (!data || typeof data !== "object") return {};
+  let base = data;
+  for (let i = 0; i < CHAVES_ANINHADAS.length; i++) {
+    const v = data[CHAVES_ANINHADAS[i]];
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      base = Object.assign({}, v, data);
+      break;
+    }
+  }
+  const limpo = {};
+  Object.keys(base).forEach(function (k) {
+    if (base[k] !== null && base[k] !== undefined) limpo[k] = base[k];
+  });
+  return limpo;
+}
+function parecePixCopiaECola(t) {
+  if (typeof t !== "string") return false;
+  const v = t.trim();
+  return /^000201/.test(v) || /br\.gov\.bcb\.pix/i.test(v);
+}
+function acharCodigoPix(obj) {
+  if (!obj || typeof obj !== "object") return null;
+  const direto = primeiroValor(obj, CHAVES_PIX_CODIGO);
+  if (direto) return direto;
+  for (let i = 0; i < CHAVES_PIX_CODIGO_GENERICO.length; i++) {
+    const v = obj[CHAVES_PIX_CODIGO_GENERICO[i]];
+    if (parecePixCopiaECola(v)) return String(v).trim();
+  }
+  // Procura mais um nível (ex.: { pix: { qr_code: "..." } }).
+  for (let i = 0; i < CHAVES_ANINHADAS.length; i++) {
+    const v = obj[CHAVES_ANINHADAS[i]];
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      const achado = acharCodigoPix(v);
+      if (achado) return achado;
+    }
+  }
+  return null;
+}
+function acharValor(obj) {
+  if (!obj || typeof obj !== "object") return null;
+  for (let i = 0; i < CHAVES_VALOR.length; i++) {
+    const n = Number(obj[CHAVES_VALOR[i]]);
+    if (n > 0) return /centavos|cents/i.test(CHAVES_VALOR[i]) ? n / 100 : n;
+  }
+  for (let i = 0; i < CHAVES_ANINHADAS.length; i++) {
+    const v = obj[CHAVES_ANINHADAS[i]];
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      const achado = acharValor(v);
+      if (achado) return achado;
+    }
+  }
+  return null;
+}
+function normalizarImagemQr(valor) {
+  if (!valor || typeof valor !== "string") return null;
+  const v = valor.trim();
+  if (/^data:image\//i.test(v)) return v;
+  if (/^https?:\/\//i.test(v)) return v;
+  const limpo = v.replace(/\s+/g, "");
+  if (limpo.length < 80 || !/^[A-Za-z0-9+/=]+$/.test(limpo)) return null;
+  return "data:image/png;base64," + limpo;
+}
+function resumoResposta(data) {
+  if (!data || typeof data !== "object") return "nenhum campo";
+  const chaves = Object.keys(data);
+  if (!chaves.length) return "nenhum campo";
+  return chaves.map(function (k) {
+    const v = data[k];
+    const tipo = v === null ? "nulo" : Array.isArray(v) ? "lista" : typeof v;
+    let amostra = "";
+    if (typeof v === "string") amostra = v.length > 36 ? v.slice(0, 36) + "…" : v;
+    else if (typeof v === "number" || typeof v === "boolean") amostra = String(v);
+    return k + " (" + tipo + (amostra ? ": " + amostra : "") + ")";
+  }).join(", ");
+}
+function carregarScript(url, limiteMs) {
+  return new Promise(function (resolve, reject) {
+    if (window.QRCode && window.QRCode.toDataURL) return resolve();
+    const existente = document.querySelector('script[data-qr-generator="1"]');
+    const finalizar = function () {
+      window.QRCode && window.QRCode.toDataURL ? resolve() : reject(new Error("Gerador de QR Code indisponível."));
+    };
+    if (existente) {
+      if (existente.dataset.pronto === "1") return finalizar();
+      existente.addEventListener("load", finalizar);
+      existente.addEventListener("error", function () { reject(new Error("Falha ao carregar o gerador de QR Code.")); });
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = url; s.async = true;
+    s.dataset.qrGenerator = "1";
+    const t = setTimeout(function () { reject(new Error("Tempo esgotado ao carregar o gerador de QR Code.")); }, limiteMs || 8000);
+    s.onload = function () { clearTimeout(t); s.dataset.pronto = "1"; finalizar(); };
+    s.onerror = function () { clearTimeout(t); reject(new Error("Falha ao carregar o gerador de QR Code.")); };
+    document.head.appendChild(s);
+  });
+}
+/* Usado quando o servidor manda só o "copia e cola": desenha o QR aqui. */
+async function gerarQrLocal(texto) {
+  if (!texto) return null;
+  try {
+    await carregarScript("https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js", 8000);
+    if (!(window.QRCode && window.QRCode.toDataURL)) return null;
+    return await window.QRCode.toDataURL(String(texto), { width: 352, margin: 1, errorCorrectionLevel: "M" });
+  } catch (e) {
+    console.warn("[portal] não conseguimos desenhar o QR Code localmente:", e);
+    return null;
+  }
+}
+/* Resposta recebida sem os campos esperados: mostra exatamente o que veio,
+   para você enviar ao suporte (ou me mandar o print). */
+function avisoRespostaInesperada(titulo, data, explicacao, metodo) {
+  console.warn("[portal] resposta recebida de " + CFG.funcoes.pagamento + " (" + metodo + "):", data);
+  let json = "";
+  try { json = JSON.stringify(data, null, 2); } catch (e) { json = String(data); }
+  const campos = resumoResposta(data);
+  abrirDialogo({
+    titulo: titulo,
+    conteudo:
+      "<p>" + esc(explicacao) + "</p>" +
+      '<p class="dica">Campos que o servidor devolveu: ' + esc(campos) + "</p>" +
+      "<p>Isso normalmente significa que a função de pagamento no servidor precisa devolver os campos esperados. " +
+      "Use o botão abaixo para copiar os detalhes e enviar ao suporte.</p>",
+    acoes: [
+      { rotulo: "Copiar detalhes", variante: "btn-fantasma", aoClicar: async function (a) {
+          const ok = await copiarTexto(json || campos);
+          notificar(ok ? "Detalhes copiados. Envie ao suporte." : "Não conseguimos copiar. Tire um print desta tela.", ok ? "ok" : "info");
+        } },
+      { rotulo: "Fechar", variante: "btn-limpo", aoClicar: function (a) { a.fechar(); } }
+    ]
+  });
+}
+function mensagemDaFuncao(error, metodo) {
+  const status = (error && error.context && error.context.status) || (error && error.status);
+  const inicial = metodo === "pix" ? "Não conseguimos gerar o código PIX. " : "Não conseguimos abrir o pagamento com cartão. ";
+  if (status === 401 || status === 403) return "Sua sessão expirou. Entre novamente para assinar.";
+  if (status === 404) return inicial + "A função de pagamento não está publicada no servidor.";
+  if (ehErroDeRede(error)) return inicial + "Sem conexão com o servidor. Verifique sua internet e tente novamente.";
+  return inicial + textoErro(error);
+}
+
 /* ---------- pagamento ---------- */
 async function abrirPagamento(metodo, botao) {
   const rotuloOriginal = botao ? (botao.dataset.rotulo || botao.textContent.trim()) : null;
@@ -1068,29 +1279,52 @@ async function abrirPagamento(metodo, botao) {
     const { data, error } = await sb.functions.invoke(CFG.funcoes.pagamento, { body: { metodo: metodo } });
     if (error || !data) {
       if (botao) liberar(botao, rotuloOriginal);
-      return notificar(error ? textoErro(error) : "Não conseguimos iniciar o pagamento. Tente novamente.", "erro");
+      console.warn("[portal] falha ao chamar " + CFG.funcoes.pagamento + " (" + metodo + "):", error);
+      return notificar(mensagemDaFuncao(error, metodo), "erro");
     }
+
+    const r = desembrulharResposta(data);
+    const recusa = r.erro || r.error;
+    if (typeof recusa === "string" && recusa.trim()) {
+      if (botao) liberar(botao, rotuloOriginal);
+      console.warn("[portal] o servidor recusou a solicitação:", data);
+      return notificar(recusa, "erro");
+    }
+
     if (metodo === "cartao") {
-      if (!data.url) { if (botao) liberar(botao, rotuloOriginal); return notificar("Não conseguimos abrir o pagamento com cartão.", "erro"); }
+      const url = primeiroValor(r, CHAVES_URL);
+      if (!url) {
+        if (botao) liberar(botao, rotuloOriginal);
+        return avisoRespostaInesperada("Pagar com cartão", data,
+          "O servidor respondeu, mas sem o endereço do checkout. Por isso o pagamento com cartão não abriu.", "cartao");
+      }
+      if (botao) liberar(botao, rotuloOriginal);
       await track("pagamento_cartao_iniciado", {});
-      location.href = data.url;
+      location.href = url;
       return;
     }
-    if (!data.qr_code || !data.qr_code_base64) {
+
+    const codigo = acharCodigoPix(r);
+    if (!codigo) {
       if (botao) liberar(botao, rotuloOriginal);
-      return notificar("Não conseguimos gerar o código PIX. Tente novamente.", "erro");
+      return avisoRespostaInesperada("Pagar com PIX", data,
+        "O servidor respondeu, mas sem o código PIX (copia e cola). Por isso o QR Code não apareceu.", "pix");
     }
+    const valor = acharValor(r);
+    const imagemServidor = normalizarImagemQr(primeiroValor(r, CHAVES_PIX_IMAGEM));
+    const restante = normalizarExpiracao(r);
     if (botao) liberar(botao, rotuloOriginal);
-    await track("pix_gerado", {});
-    exibirPix(data);
+    await track("pix_gerado", { informou_imagem: !!imagemServidor });
+    exibirPix({ codigo: codigo, imagem: imagemServidor, valor: valor, expiracao: restante });
   } catch (err) {
     if (botao) liberar(botao, rotuloOriginal);
+    console.warn("[portal] erro inesperado no pagamento:", err);
     notificar(textoErro(err), "erro");
   }
 }
 function normalizarExpiracao(data) {
-  const c = data.expiracao || data.expira_em || data.expiracao_em || data.expires_at;
-  if (c === null || c === undefined) return CFG.expiracaoPixSegundos;
+  const c = data.expiracao || data.expira_em || data.expiracao_em || data.expires_at || data.expiration || data.expiresIn;
+  if (c === null || c === undefined || c === "") return CFG.expiracaoPixSegundos;
   if (typeof c === "number") {
     if (c > 1e12) return Math.max(0, Math.round((c - Date.now()) / 1000));
     if (c > 1e9 && c < 1e12) return Math.max(0, Math.round(c - Date.now() / 1000));
@@ -1100,10 +1334,10 @@ function normalizarExpiracao(data) {
   if (isNaN(t)) return CFG.expiracaoPixSegundos;
   return Math.max(0, Math.round((t - Date.now()) / 1000));
 }
-function exibirPix(data) {
+function exibirPix(pix) {
   limparTimers();
-  const valor = Number(data.valor) > 0 ? Number(data.valor) : (acessoAtual && acessoAtual.preco ? acessoAtual.preco : null);
-  let restante = normalizarExpiracao(data);
+  const valor = (Number(pix.valor) > 0 ? Number(pix.valor) : (acessoAtual && acessoAtual.preco ? acessoAtual.preco : null));
+  let restante = typeof pix.expiracao === "number" ? pix.expiracao : CFG.expiracaoPixSegundos;
   let expirou = false;
 
   const dialogo = abrirDialogo({
@@ -1112,11 +1346,12 @@ function exibirPix(data) {
     conteudo:
       '<p class="pix-rotulo">Valor a pagar</p>' +
       '<p class="pix-valor">' + (valor ? brl(valor) : "conforme o servidor") + "</p>" +
-      '<p class="sub" style="text-align:center">Escaneie o QR Code ou use o código copia e cola.</p>' +
-      '<img class="pix-qr" width="176" height="176" alt="QR Code para pagamento via PIX" src="data:image/png;base64,' + esc(data.qr_code_base64) + '">' +
+      '<p class="sub" style="text-align:center;margin-bottom:10px">Escaneie o QR Code ou use o código copia e cola.</p>' +
+      '<div class="pix-qr-caixa" id="pix-qr-caixa"><p class="carregando">' +
+        (pix.imagem ? "Carregando o QR Code…" : "Gerando o QR Code…") + "</p></div>" +
       '<p class="pix-tempo" id="pix-tempo" role="timer">Tempo restante: —</p>' +
       '<label class="rotulo" for="pix-codigo">PIX copia e cola</label>' +
-      '<div class="linha-codigo"><input class="campo" id="pix-codigo" readonly value="' + esc(data.qr_code) + '">' +
+      '<div class="linha-codigo"><input class="campo" id="pix-codigo" readonly value="' + esc(pix.codigo) + '">' +
       '<button type="button" class="btn btn-fantasma btn-xs" id="b-copiar">' + ico("copiar", 16) + "Copiar</button></div>" +
       '<p class="aguardando" id="pix-status" role="status">Aguardando o pagamento. A liberação é automática.</p>',
     acoes: [
@@ -1127,11 +1362,29 @@ function exibirPix(data) {
     aoFechar: function () { limparTimers(); }
   });
 
+  const caixaQr = dialogo.caixa.querySelector("#pix-qr-caixa");
+  function pintarQr(imagem) {
+    if (!caixaQr || !imagem || !caixaQr.isConnected) return;
+    caixaQr.innerHTML = '<img class="pix-qr" width="176" height="176" alt="QR Code para pagamento via PIX" src="' + esc(imagem) + '">';
+  }
+  if (pix.imagem) {
+    pintarQr(pix.imagem);
+  } else {
+    gerarQrLocal(pix.codigo).then(function (gerada) {
+      if (!caixaQr || !caixaQr.isConnected) return;
+      if (gerada) return pintarQr(gerada);
+      caixaQr.innerHTML = '<p class="dica" style="text-align:center;padding:0 12px">' +
+        "Não conseguimos desenhar o QR Code agora. Use o código copia e cola abaixo — ele funciona do mesmo jeito.</p>";
+    });
+  }
+
   const bCopiar = dialogo.caixa.querySelector("#b-copiar");
   if (bCopiar) bCopiar.onclick = async function () {
     const campo = dialogo.caixa.querySelector("#pix-codigo");
-    try { await navigator.clipboard.writeText(campo.value); notificar("Código PIX copiado.", "ok"); }
-    catch (e) { campo.select(); notificar("Selecionamos o código. Copie com Ctrl+C.", "info"); }
+    const ok = await copiarTexto(campo.value);
+    if (ok) return notificar("Código PIX copiado.", "ok");
+    campo.select();
+    notificar("Selecionamos o código. Copie com Ctrl+C.", "info");
   };
 
   function pintarTempo() {
@@ -1345,9 +1598,10 @@ async function cancelarAssinatura(info) {
   d.fechar();
   if (r.ok) {
     await track("assinatura_cancelada", {});
+    const ate = (r.data && r.data.acesso_ate) || info.valid_until;
     abrirDialogo({
       titulo: "Assinatura cancelada",
-      conteudo: "<p>Não haverá novas cobranças." + (r.data.acesso_ate || info.valid_until ? " Seu acesso continua até <b>" + fmtData(r.data.acesso_ate || info.valid_until) + "</b>." : "") + "</p>",
+      conteudo: "<p>Não haverá novas cobranças." + (ate ? " Seu acesso continua até <b>" + fmtData(ate) + "</b>." : "") + "</p>",
       acoes: [{ rotulo: "Entendi", variante: "btn-primario", aoClicar: function (x) { x.fechar(); abrir(); } }]
     });
     return;
@@ -1393,7 +1647,7 @@ async function excluirConta() {
     d.fechar();
     if (error || (data && data.error)) return notificar(error ? textoErro(error) : data.error, "erro");
     await track("conta_excluida", {});
-    await sb.auth.signOut();
+    try { await sb.auth.signOut(); } catch (e) {}
     telaLogin("Sua conta foi excluída. Obrigado por ter usado o portal.");
   } catch (err) {
     d.fechar();
@@ -1402,6 +1656,7 @@ async function excluirConta() {
 }
 async function sair() {
   limparTimers();
+  modoRecuperacao = false;
   try { await sb.auth.signOut(); } catch (e) {}
   telaLogin("Você saiu da sua conta.");
 }
@@ -1437,7 +1692,6 @@ async function telaApp(info) {
 
   // Observa a versão do conteúdo: avisa em vez de recarregar e apagar o trabalho em andamento.
   intervaloVersao = setInterval(function () { verificarVersao(info); }, 5 * 60 * 1000);
-  document.addEventListener("visibilitychange", aoVoltarParaAba, { passive: true });
 }
 function mostrarFaixa(info) {
   const faixa = $("faixa");
@@ -1463,11 +1717,13 @@ function mostrarFaixa(info) {
   if (b) b.onclick = function () { abrirConta(info); };
 }
 async function verificarVersao(info) {
-  if (document.hidden) return;
+  if (document.hidden || !document.body.classList.contains("modo-app")) return;
   const versao = await buscarVersao();
   if (versao === null || versao === "" || versao === (info.conteudo.versao || "")) return;
+  if (avisoConstruido === versao) return;
   const faixa = $("faixa");
   if (!faixa) return;
+  avisoConstruido = versao;
   faixa.hidden = false;
   faixa.className = "faixa faixa-info";
   faixa.innerHTML = ico("atualizar", 16) + "<p>Existe uma versão nova da calculadora (v" + esc(versao) + "). Seus dados estão salvos.</p>" +
@@ -1484,7 +1740,6 @@ async function aoVoltarParaAba() {
   if (!r.info.liberado) { limparTimers(); return telaAssinar(r.info); }
   if (r.info.situacao.chave === "aviso") mostrarFaixa(r.info);
 }
-let ultimaRevalidacao = 0;
 
 /* ---------------------- integração com a calculadora ---------------------- */
 window.addEventListener("message", async function (e) {
@@ -1515,11 +1770,13 @@ window.addEventListener("unhandledrejection", function (e) {
 window.addEventListener("error", function (e) {
   if (e && e.message) console.error(e.message);
 });
+// Registrado uma única vez (antes ficava sendo adicionado a cada entrada no app).
+document.addEventListener("visibilitychange", aoVoltarParaAba, { passive: true });
 
 (async function iniciar() {
   if (!sb) return telaFalhaCarregamento();
   try {
-    sb.auth.onAuthStateChange(function (evento) {
+    sb.auth.onAuthStateChange(function (evento, sessao) {
       if (evento === "PASSWORD_RECOVERY") { modoRecuperacao = true; telaNovaSenha(); return; }
       if (evento === "SIGNED_OUT" && !modoRecuperacao) {
         limparTimers();
